@@ -84,9 +84,9 @@ npm run web      # start web target
 
 The app requests permissions at runtime:
 
-| Permission | Used for |
-|------------|----------|
-| Camera | Taking photos for places |
+| Permission            | Used for                                   |
+| --------------------- | ------------------------------------------ |
+| Camera                | Taking photos for places                   |
 | Location (foreground) | Reading GPS coordinates for “Get Location” |
 
 Camera permission text is configured in `app.json` via the `expo-image-picker` plugin.
@@ -107,6 +107,7 @@ fav-places/
 │   │   ├── PlaceItem.js       # Single place row
 │   │   └── PlacesList.js      # FlatList of places
 │   └── UI/
+|       |── IconButton.js
 │       └── OutlinedButton.js  # Icon + label button
 ├── models/
 │   └── place.js           # Place data model
@@ -115,16 +116,15 @@ fav-places/
 │   ├── AddPlace.js        # Add a new place
 │   ├── Map.js             # (planned) interactive map
 │   └── PlaceDetails.js    # (planned) place detail view
-├── UI/
-│   └── IconButton.js      # Header icon button
+
 └── util/
     └── location.js        # Google Static Maps URL helper
 ```
 
 ## Environment variables
 
-| Variable | Description |
-|----------|-------------|
+| Variable                     | Description                                |
+| ---------------------------- | ------------------------------------------ |
 | `EXPO_PUBLIC_GOOGLE_API_KEY` | Google API key with Maps Static API access |
 
 See `.env.example`. Do not commit `.env.local` (it is gitignored).

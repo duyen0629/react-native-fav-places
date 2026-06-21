@@ -34,11 +34,11 @@ function ImagePicker() {
   }
   let imagePreview = <Text>No image taken yet.</Text>;
   if (pickedImage) {
-    imagePreview = <Image source={{ uri: pickedImage }} style={styles.imagePreview} />;
+    imagePreview = <Image source={{ uri: pickedImage }} />;
   }
   return (
     <View>
-      <View>{imagePreview}</View>
+      <View style={styles.imagePreview}>{imagePreview}</View>
       <OutlinedButton icon="camera" onPress={takeImageHandler}>
         Take Image
       </OutlinedButton>

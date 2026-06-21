@@ -3,20 +3,25 @@ import { useState } from "react";
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
+import Button from "../UI/Button";
 
 function PlaceForm() {
   const [enteredTitle, setEnteredTitle] = useState("");
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);
   }
+  function savePlaceHandler() {
+    console.log(enteredTitle);
+  }
   return (
     <ScrollView style={styles.form}>
       <View>
-        <Text>Title</Text>
+        <Text style={styles.label}>Title</Text>
         <TextInput value={enteredTitle} onChangeText={changeTitleHandler} style={styles.input} />
       </View>
       <ImagePicker />
       <LocationPicker />
+      <Button onPress={savePlaceHandler}>Add Place</Button>
     </ScrollView>
   );
 }

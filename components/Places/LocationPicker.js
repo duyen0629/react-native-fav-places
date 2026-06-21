@@ -6,7 +6,7 @@ import { Colors } from "../../constants/colors";
 import { getMapPreview } from "../../util/location";
 import { useNavigation, useRoute, useIsFocused } from "@react-navigation/native";
 
-function LocationPicker() {
+function LocationPicker({ onLocationPicked }) {
   const route = useRoute();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -26,6 +26,12 @@ function LocationPicker() {
     }
   }, [route, isFocused]);
 
+  useEffect(() => {
+    if (pickedLocation) {
+      onLocationPicked(pickedLocation);
+    }
+  }, [pickedLocation, onLocationPicked]);
+
   async function verifyPermissions() {
     if (locationPermissionInformation.status === PermissionStatus.UNDETERMINED) {
       const permissionResponse = await requestPermission();
@@ -41,6 +47,7 @@ function LocationPicker() {
   function pickOnMapHandler() {
     navigation.navigate("Map");
   }
+
   async function getLocationHandler() {
     const hasPermission = await verifyPermissions();
     if (!hasPermission) {

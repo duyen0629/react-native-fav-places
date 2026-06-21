@@ -26,7 +26,6 @@ function LocationPicker() {
   }
   async function getLocationHandler() {
     const hasPermission = await verifyPermissions();
-    console.log(hasPermission);
     if (!hasPermission) {
       return;
     }
@@ -35,7 +34,6 @@ function LocationPicker() {
       Alert.alert("Could not get location!", "Please try again later or pick a location on the map.");
       return;
     }
-    console.log(location);
     setPickedLocation({
       lat: location.coords.latitude,
       lng: location.coords.longitude,
@@ -45,7 +43,6 @@ function LocationPicker() {
   let locationPreview = <Text>No location picked yet.</Text>;
   if (pickedLocation) {
     const imagePreviewUrl = getMapPreview(pickedLocation.lat, pickedLocation.lng);
-    console.log(imagePreviewUrl);
     locationPreview = <Image source={{ uri: imagePreviewUrl }} style={styles.mapImage} />;
   }
   return (

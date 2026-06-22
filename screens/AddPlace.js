@@ -5,9 +5,7 @@ function AddPlace({ navigation }) {
   function createPlaceHandler(placeData) {
     insertPlace(placeData)
       .then(() => {
-        navigation.navigate("AllPlaces", {
-          placeData,
-        });
+        navigation.navigate("AllPlaces");
       })
       .catch((error) => {
         Alert.alert("Could not save place. Please try again later.");

@@ -35,3 +35,9 @@ export async function insertPlace(place) {
   console.log(result);
   return result;
 }
+
+export async function fetchPlaces() {
+  const db = await getDatabase();
+  const result = await db.getAllAsync("SELECT * FROM places");
+  return result;
+}

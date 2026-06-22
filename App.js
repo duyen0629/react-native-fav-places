@@ -8,7 +8,9 @@ import { Colors } from "./constants/colors";
 import Map from "./screens/Map";
 import { init } from "./util/database";
 import { useEffect, useState } from "react";
-import AppLoading from "expo-app-loading";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
@@ -16,13 +18,25 @@ export default function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
 
   useEffect(() => {
-    init().then(() => {
-      setDbInitialized(true);
-    });
+    async function prepare() {
+      try {
+        await init();
+      } finally {
+        setDbInitialized(true);
+      }
+    }
+
+    prepare();
   }, []);
 
+  useEffect(() => {
+    if (dbInitialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [dbInitialized]);
+
   if (!dbInitialized) {
-    return <AppLoading />;
+    return null;
   }
 
   return (

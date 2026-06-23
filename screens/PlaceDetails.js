@@ -32,9 +32,7 @@ function PlaceDetails({ route, navigation }) {
 
     navigation.setOptions({
       title: loadedPlace.title,
-      headerRight: ({ tintColor }) => (
-        <IconButton icon="trash" size={24} color={tintColor} onPress={deletePlaceHandler} />
-      ),
+      headerRight: () => <IconButton icon="trash" size={18} onPress={deletePlaceHandler} />,
     });
   }, [navigation, loadedPlace, selectedPlaceId]);
 
@@ -59,22 +57,26 @@ function PlaceDetails({ route, navigation }) {
   if (!loadedPlace) {
     return (
       <View style={styles.fallback}>
-        <Text>Loading place data...</Text>
+        <Text style={styles.loadingEmoji}>💕</Text>
+        <Text style={styles.loadingText}>Loading place data...</Text>
       </View>
     );
   }
 
   return (
-    <View>
-      <Image source={{ uri: loadedPlace.imageUri }} style={styles.image} />
-      <View style={styles.locationContainer}>
-        <View style={styles.addressContainer}>
-          <Text style={styles.address}>{loadedPlace.address}</Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.imageWrapper}>
+        <Image source={{ uri: loadedPlace.imageUri }} style={styles.image} />
       </View>
-      <OutlinedButton icon="map" onPress={showOnMapHandler}>
-        View on Map
-      </OutlinedButton>
+      <View style={styles.addressCard}>
+        <Text style={styles.addressLabel}>🎀 Address</Text>
+        <Text style={styles.address}>{loadedPlace.address}</Text>
+      </View>
+      <View style={styles.actions}>
+        <OutlinedButton icon="map" onPress={showOnMapHandler}>
+          View on Map
+        </OutlinedButton>
+      </View>
     </View>
   );
 }
@@ -82,27 +84,68 @@ function PlaceDetails({ route, navigation }) {
 export default PlaceDetails;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   fallback: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: Colors.background,
+  },
+  loadingEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: Colors.gray500,
+    fontWeight: "500",
+  },
+  imageWrapper: {
+    margin: 16,
+    borderRadius: 24,
+    overflow: "hidden",
+    elevation: 4,
+    shadowColor: Colors.primary500,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 12,
   },
   image: {
-    height: "35%",
-    minHeight: 300,
+    height: 280,
     width: "100%",
   },
-  locationContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addressContainer: {
+  addressCard: {
+    marginHorizontal: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     padding: 20,
+    elevation: 2,
+    shadowColor: Colors.primary500,
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.primary400,
+  },
+  addressLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.gray500,
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   address: {
-    color: Colors.primary500,
-    textAlign: "center",
-    fontWeight: "bold",
+    color: Colors.gray700,
     fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  actions: {
+    marginTop: 20,
+    alignItems: "center",
   },
 });

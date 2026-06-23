@@ -30,14 +30,26 @@ function PlaceForm({ onCreatePlace }) {
   }
 
   return (
-    <ScrollView style={styles.form}>
-      <View>
-        <Text style={styles.label}>Title</Text>
-        <TextInput value={enteredTitle} onChangeText={changeTitleHandler} style={styles.input} />
+    <ScrollView style={styles.form} contentContainerStyle={styles.formContent} showsVerticalScrollIndicator={false}>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>💗 Title</Text>
+        <TextInput
+          value={enteredTitle}
+          onChangeText={changeTitleHandler}
+          style={styles.input}
+          placeholder="Name your cozy spot..."
+          placeholderTextColor={Colors.gray500}
+        />
       </View>
-      <ImagePicker onImageTaken={takeImageHandler} />
-      <LocationPicker onLocationPicked={pickLocationHandler} />
-      <Button onPress={savePlaceHandler}>Add Place</Button>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>🌸 Photo</Text>
+        <ImagePicker onImageTaken={takeImageHandler} />
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>🎀 Location</Text>
+        <LocationPicker onLocationPicked={pickLocationHandler} />
+      </View>
+      <Button onPress={savePlaceHandler}>Save My Place 💕</Button>
     </ScrollView>
   );
 }
@@ -47,20 +59,40 @@ export default PlaceForm;
 const styles = StyleSheet.create({
   form: {
     flex: 1,
-    padding: 24,
+    backgroundColor: Colors.background,
   },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: Colors.primary700,
+  formContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  section: {
+    backgroundColor: Colors.surface,
+    borderRadius: 24,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.primary100,
+    elevation: 2,
+    shadowColor: Colors.primary500,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
+  },
+  sectionLabel: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.gray700,
+    marginBottom: 12,
   },
   input: {
-    narginVertical: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 8,
+    marginVertical: 4,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     fontSize: 16,
-    borderBottomColor: Colors.primary700,
-    borderBottomWidth: 2,
-    backgroundColor: Colors.primary100,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.primary100,
+    backgroundColor: Colors.surfaceSoft,
+    color: Colors.gray700,
   },
 });

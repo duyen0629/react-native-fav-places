@@ -69,7 +69,11 @@ function LocationPicker({ onLocationPicked }) {
     });
   }
 
-  let locationPreview = <Text>No location picked yet.</Text>;
+  let locationPreview = (
+    <View style={styles.placeholder}>
+      <Text style={styles.placeholderText}>Where is your happy place?</Text>
+    </View>
+  );
   if (pickedLocation) {
     const imagePreviewUrl = getMapPreview(pickedLocation.lat, pickedLocation.lng);
     locationPreview = <Image source={{ uri: imagePreviewUrl }} style={styles.mapImage} />;
@@ -78,10 +82,10 @@ function LocationPicker({ onLocationPicked }) {
     <View>
       <View style={styles.mapPreview}>{locationPreview}</View>
       <View style={styles.actions}>
-        <OutlinedButton icon="map" onPress={pickOnMapHandler}>
+        <OutlinedButton icon="map" onPress={pickOnMapHandler} style={styles.actionButton}>
           Pick on Map
         </OutlinedButton>
-        <OutlinedButton icon="location" onPress={getLocationHandler}>
+        <OutlinedButton icon="location" onPress={getLocationHandler} style={styles.actionButton}>
           Get Location
         </OutlinedButton>
       </View>
@@ -94,21 +98,38 @@ export default LocationPicker;
 const styles = StyleSheet.create({
   mapPreview: {
     width: "100%",
-    height: 200,
-    marginVertical: 8,
+    height: 180,
+    marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary100,
-    borderRadius: 4,
+    backgroundColor: Colors.surfaceSoft,
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: Colors.primary200,
+    borderStyle: "dashed",
+  },
+  placeholder: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    fontSize: 14,
+    color: Colors.gray500,
+    fontWeight: "600",
   },
   actions: {
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
+    gap: 8,
+  },
+  actionButton: {
+    flex: 1,
+    margin: 0,
+    paddingHorizontal: 8,
   },
   mapImage: {
     width: "100%",
     height: "100%",
-    borderRadius: 4,
   },
 });

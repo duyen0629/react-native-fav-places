@@ -1,5 +1,6 @@
 import MapView, { Marker } from "react-native-maps";
 import { StyleSheet, Alert } from "react-native";
+import { Colors } from "../constants/colors";
 import { useState, useLayoutEffect, useCallback } from "react";
 import IconButton from "../components/UI/IconButton";
 
@@ -42,9 +43,7 @@ function Map({ navigation, route }) {
       return;
     }
     navigation.setOptions({
-      headerRight: ({ tintColor }) => (
-        <IconButton icon="save" size={24} color={tintColor} onPress={savePickedLocationHandler} />
-      ),
+      headerRight: () => <IconButton icon="save" size={18} onPress={savePickedLocationHandler} />,
     });
   }, [navigation, savePickedLocationHandler, initialLocation]);
 
@@ -53,6 +52,7 @@ function Map({ navigation, route }) {
       {selectedLocation && (
         <Marker
           title="Picked Location"
+          pinColor={Colors.primary500}
           coordinate={{ latitude: selectedLocation.lat, longitude: selectedLocation.lng }}
         />
       )}

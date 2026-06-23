@@ -5,7 +5,6 @@ import { useNavigation } from "@react-navigation/native";
 function PlaceItem({ place }) {
   const navigation = useNavigation();
   function selectPlaceHandler() {
-    console.log("placeId", place.id);
     navigation.navigate("PlaceDetails", { placeId: place.id });
   }
 
@@ -14,7 +13,12 @@ function PlaceItem({ place }) {
       <Image source={{ uri: place.imageUri }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.title}>{place.title}</Text>
-        <Text style={styles.address}>{place.address}</Text>
+        <Text style={styles.address} numberOfLines={2}>
+          {place.address}
+        </Text>
+      </View>
+      <View style={styles.heartBadge}>
+        <Text style={styles.heart}>💗</Text>
       </View>
     </Pressable>
   );
@@ -24,36 +28,54 @@ export default PlaceItem;
 const styles = StyleSheet.create({
   item: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    borderRadius: 6,
-    marginVertical: 12,
-    backgroundColor: Colors.primary500,
-    elevation: 2,
-    shadowColor: "black",
+    alignItems: "center",
+    borderRadius: 24,
+    marginVertical: 8,
+    backgroundColor: Colors.surface,
+    borderWidth: 2,
+    borderColor: Colors.primary100,
+    elevation: 3,
+    shadowColor: Colors.primary500,
     shadowOpacity: 0.15,
-    shadowOffset: { width: 1, height: 1 },
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    overflow: "hidden",
   },
   pressed: {
-    opacity: 0.8,
+    opacity: 0.9,
+    transform: [{ scale: 0.97 }],
   },
   image: {
-    flex: 1,
-    borderBottomLeftRadius: 4,
-    borderTopLeftRadius: 4,
-    height: 100,
+    width: 96,
+    height: 96,
+    borderTopLeftRadius: 22,
+    borderBottomLeftRadius: 22,
   },
   info: {
-    flex: 2,
-    padding: 12,
+    flex: 1,
+    padding: 14,
   },
   title: {
-    fontWeight: "bold",
-    fontSize: 18,
+    fontWeight: "800",
+    fontSize: 17,
     color: Colors.gray700,
+    marginBottom: 4,
   },
   address: {
-    fontSize: 12,
-    color: Colors.gray700,
+    fontSize: 13,
+    color: Colors.gray500,
+    lineHeight: 18,
+  },
+  heartBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary50,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  heart: {
+    fontSize: 16,
   },
 });

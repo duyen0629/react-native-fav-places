@@ -42,16 +42,20 @@ export default function App() {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
             headerStyle: {
               backgroundColor: Colors.primary500,
             },
-            headerTintColor: Colors.gray700,
+            headerTintColor: Colors.textLight,
+            headerTitleStyle: {
+              fontWeight: "700",
+              fontSize: 18,
+            },
             contentStyle: {
-              backgroundColor: Colors.gray700,
+              backgroundColor: Colors.background,
             },
           }}
         >
@@ -59,9 +63,9 @@ export default function App() {
             name="AllPlaces"
             component={AllPlaces}
             options={({ navigation }) => ({
-              title: "Your Favorite Places",
-              headerRight: ({ tintColor }) => (
-                <IconButton icon="add" size={24} color={tintColor} onPress={() => navigation.navigate("AddPlace")} />
+              title: "Favorite Places",
+              headerRight: () => (
+                <IconButton icon="add" size={20} onPress={() => navigation.navigate("AddPlace")} />
               ),
             })}
           />

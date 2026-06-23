@@ -36,7 +36,7 @@ function ImagePicker({ onImageTaken }) {
 
   let imagePreview = (
     <View style={styles.imagePreview}>
-      <Text>No image taken yet.</Text>
+      <Text style={styles.placeholderText}>Capture a sweet memory!</Text>
     </View>
   );
   if (pickedImage) {
@@ -44,9 +44,9 @@ function ImagePicker({ onImageTaken }) {
   }
   return (
     <View>
-      <View>{imagePreview}</View>
+      <View style={styles.previewContainer}>{imagePreview}</View>
       <OutlinedButton icon="camera" onPress={takeImageHandler}>
-        Take Image
+        Take Photo
       </OutlinedButton>
     </View>
   );
@@ -55,12 +55,25 @@ function ImagePicker({ onImageTaken }) {
 export default ImagePicker;
 
 const styles = StyleSheet.create({
+  previewContainer: {
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
   imagePreview: {
     width: "100%",
-    height: 200,
-    marginVertical: 8,
+    height: 180,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary100,
+    backgroundColor: Colors.surfaceSoft,
+    borderWidth: 2,
+    borderColor: Colors.primary200,
+    borderStyle: "dashed",
+    borderRadius: 20,
+  },
+  placeholderText: {
+    fontSize: 14,
+    color: Colors.gray500,
+    fontWeight: "600",
   },
 });

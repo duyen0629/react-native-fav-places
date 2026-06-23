@@ -3,17 +3,24 @@ import { StyleSheet, Alert } from "react-native";
 import { useState, useLayoutEffect, useCallback } from "react";
 import IconButton from "../components/UI/IconButton";
 
-function Map({ navigation }) {
-  const [selectedLocation, setSelectedLocation] = useState(null);
+function Map({ navigation, route }) {
+  const initialLocation = route.params && {
+    lat: route.params.initialLat,
+    lng: route.params.initialLng,
+  };
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
 
   const region = {
-    latitude: 37.7749,
-    longitude: -122.4194,
+    latitude: initialLocation?.lat || 37.7749,
+    longitude: initialLocation?.lng || -122.4194,
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
 
   function handleSelectLocation(event) {
+    if (initialLocation) {
+      return;
+    }
     const lat = event.nativeEvent.coordinate.latitude;
     const lng = event.nativeEvent.coordinate.longitude;
     setSelectedLocation({ lat, lng });
@@ -31,12 +38,15 @@ function Map({ navigation }) {
   }, [navigation, selectedLocation]);
 
   useLayoutEffect(() => {
+    if (initialLocation) {
+      return;
+    }
     navigation.setOptions({
       headerRight: ({ tintColor }) => (
         <IconButton icon="save" size={24} color={tintColor} onPress={savePickedLocationHandler} />
       ),
     });
-  }, [navigation, savePickedLocationHandler]);
+  }, [navigation, savePickedLocationHandler, initialLocation]);
 
   return (
     <MapView initialRegion={region} style={styles.map} onPress={handleSelectLocation}>

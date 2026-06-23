@@ -9,7 +9,12 @@ function PlaceDetails({ route, navigation }) {
   const selectedPlaceId = route.params.placeId;
   const [loadedPlace, setLoadedPlace] = useState(null);
 
-  function showOnMapHandler() {}
+  function showOnMapHandler() {
+    navigation.navigate("Map", {
+      initialLat: loadedPlace.lat,
+      initialLng: loadedPlace.lng,
+    });
+  }
 
   useEffect(() => {
     async function loadPlaceData() {
@@ -39,6 +44,9 @@ function PlaceDetails({ route, navigation }) {
           <Text style={styles.address}>{loadedPlace.address}</Text>
         </View>
       </View>
+      <OutlinedButton icon="map" onPress={showOnMapHandler}>
+        View on Map
+      </OutlinedButton>
     </View>
   );
 }

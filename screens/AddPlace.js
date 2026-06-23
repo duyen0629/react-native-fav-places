@@ -8,7 +8,7 @@ function AddPlace({ navigation }) {
     insertPlace(placeData)
       .then(() => {
         resetAddPlaceDraft();
-        navigation.navigate("AllPlaces");
+        navigation.popToTop();
       })
       .catch(() => {
         Alert.alert("Could not save place. Please try again later.");

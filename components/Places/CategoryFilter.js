@@ -1,5 +1,5 @@
-import { ScrollView, Pressable, Text, StyleSheet } from "react-native";
-import { CATEGORIES } from "../../constants/categories";
+import { ScrollView, Pressable, Text, StyleSheet, Image } from "react-native";
+import { CATEGORIES, getCategoryIcon } from "../../constants/categories";
 import { Colors } from "../../constants/colors";
 
 export const ALL_CATEGORIES = "All";
@@ -16,12 +16,15 @@ function CategoryFilter({ selectedCategory, onCategoryChange }) {
     >
       {FILTER_OPTIONS.map((category) => {
         const isSelected = selectedCategory === category;
+        const icon = category !== ALL_CATEGORIES ? getCategoryIcon(category) : null;
+
         return (
           <Pressable
             key={category}
             onPress={() => onCategoryChange(category)}
             style={({ pressed }) => [styles.chip, isSelected && styles.chipSelected, pressed && styles.chipPressed]}
           >
+            {icon && <Image source={icon} style={styles.chipIcon} resizeMode="contain" />}
             <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{category}</Text>
           </Pressable>
         );
@@ -45,6 +48,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
@@ -58,6 +63,11 @@ const styles = StyleSheet.create({
   },
   chipPressed: {
     opacity: 0.85,
+  },
+  chipIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 4,
   },
   chipText: {
     fontSize: 13,

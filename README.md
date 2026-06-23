@@ -138,7 +138,7 @@ fav-places/
 ├── App.js                     # Navigation stack, DB init, splash screen, safe-area header
 ├── app.json                   # Expo config and plugins
 ├── constants/
-│   ├── categories.js          # Place category list
+│   ├── categories.js          # Place category list and icons
 │   └── colors.js              # Pink theme palette
 ├── components/
 │   ├── Places/

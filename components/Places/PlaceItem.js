@@ -1,9 +1,12 @@
 import { View, Text, Pressable, Image, StyleSheet } from "react-native";
 import { Colors } from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
+import { getCategoryIcon } from "../../constants/categories";
 
 function PlaceItem({ place }) {
   const navigation = useNavigation();
+  const categoryIcon = getCategoryIcon(place.category);
+
   function selectPlaceHandler() {
     navigation.navigate("PlaceDetails", { placeId: place.id });
   }
@@ -12,14 +15,16 @@ function PlaceItem({ place }) {
     <Pressable style={({ pressed }) => [styles.item, pressed && styles.pressed]} onPress={selectPlaceHandler}>
       <Image source={{ uri: place.imageUri }} style={styles.image} />
       <View style={styles.info}>
-        <Text style={styles.category}>{place.category}</Text>
+        <View style={styles.categoryRow}>
+          <Text style={styles.category}>{place.category}</Text>
+        </View>
         <Text style={styles.title}>{place.title}</Text>
         <Text style={styles.address} numberOfLines={2}>
           {place.address}
         </Text>
       </View>
-      <View style={styles.heartBadge}>
-        <Text style={styles.heart}>💗</Text>
+      <View style={styles.categoryBadge}>
+        {categoryIcon && <Image source={categoryIcon} style={styles.categoryBadgeIcon} resizeMode="contain" />}
       </View>
     </Pressable>
   );
@@ -62,20 +67,30 @@ const styles = StyleSheet.create({
     color: Colors.gray700,
     marginBottom: 4,
   },
+  categoryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  categoryIcon: {
+    width: 18,
+    height: 18,
+    marginRight: 6,
+  },
   category: {
     fontSize: 11,
     fontWeight: "700",
     color: Colors.primary700,
-    marginBottom: 4,
     textTransform: "uppercase",
     letterSpacing: 0.4,
+    flex: 1,
   },
   address: {
     fontSize: 13,
     color: Colors.gray500,
     lineHeight: 18,
   },
-  heartBadge: {
+  categoryBadge: {
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -84,7 +99,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  heart: {
-    fontSize: 16,
+  categoryBadgeIcon: {
+    width: 22,
+    height: 22,
   },
 });

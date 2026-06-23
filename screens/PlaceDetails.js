@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, Alert } from "react-native";
 import OutlinedButton from "../components/UI/OutlinedButton";
 import IconButton from "../components/UI/IconButton";
 import { Colors } from "../constants/colors";
+import { getCategoryIcon } from "../constants/categories";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { deletePlace, fetchPlaceById } from "../util/database";
 
@@ -64,13 +65,18 @@ function PlaceDetails({ route, navigation }) {
     );
   }
 
+  const categoryIcon = getCategoryIcon(loadedPlace.category);
+
   return (
     <View style={styles.container}>
       <View style={styles.imageWrapper}>
         <Image source={{ uri: loadedPlace.imageUri }} style={styles.image} />
       </View>
       <View style={styles.addressCard}>
-        <Text style={styles.category}>{loadedPlace.category}</Text>
+        <View style={styles.category}>
+          {categoryIcon && <Image source={categoryIcon} style={styles.categoryIcon} resizeMode="contain" />}
+          <Text style={styles.categoryText}>{loadedPlace.category}</Text>
+        </View>
         <Text style={styles.addressLabel}>Address</Text>
         <Text style={styles.address}>{loadedPlace.address}</Text>
       </View>
@@ -134,15 +140,24 @@ const styles = StyleSheet.create({
   },
   category: {
     alignSelf: "flex-start",
-    fontSize: 12,
-    fontWeight: "700",
-    color: Colors.primary700,
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.primary50,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 14,
     marginBottom: 12,
     overflow: "hidden",
+  },
+  categoryIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.primary700,
   },
   addressLabel: {
     fontSize: 13,

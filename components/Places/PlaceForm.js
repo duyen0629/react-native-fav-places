@@ -49,7 +49,7 @@ function PlaceForm({ onCreatePlace }) {
         <Text style={styles.sectionLabel}>🎀 Location</Text>
         <LocationPicker onLocationPicked={pickLocationHandler} />
       </View>
-      <Button onPress={savePlaceHandler}>Save My Place 💕</Button>
+      <Button onPress={savePlaceHandler}>Save My Place </Button>
     </ScrollView>
   );
 }

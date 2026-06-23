@@ -13,6 +13,7 @@ function PlaceDetails({ route, navigation }) {
     navigation.navigate("Map", {
       initialLat: loadedPlace.lat,
       initialLng: loadedPlace.lng,
+      readOnly: true,
     });
   }
 

@@ -49,10 +49,6 @@ function LocationPicker({ onLocationPicked }) {
     return true;
   }
 
-  function pickOnMapHandler() {
-    navigation.navigate("Map");
-  }
-
   async function getLocationHandler() {
     const hasPermission = await verifyPermissions();
     if (!hasPermission) {
@@ -60,12 +56,12 @@ function LocationPicker({ onLocationPicked }) {
     }
     const location = await getCurrentPositionAsync();
     if (!location) {
-      Alert.alert("Could not get location!", "Please try again later or pick a location on the map.");
+      Alert.alert("Could not get location!", "Please try again later.");
       return;
     }
-    setPickedLocation({
-      lat: location.coords.latitude,
-      lng: location.coords.longitude,
+    navigation.navigate("Map", {
+      initialLat: location.coords.latitude,
+      initialLng: location.coords.longitude,
     });
   }
 
@@ -81,14 +77,9 @@ function LocationPicker({ onLocationPicked }) {
   return (
     <View>
       <View style={styles.mapPreview}>{locationPreview}</View>
-      <View style={styles.actions}>
-        <OutlinedButton icon="map" onPress={pickOnMapHandler} style={styles.actionButton}>
-          Pick on Map
-        </OutlinedButton>
-        <OutlinedButton icon="location" onPress={getLocationHandler} style={styles.actionButton}>
-          Get Location
-        </OutlinedButton>
-      </View>
+      <OutlinedButton icon="location" onPress={getLocationHandler}>
+        Get Location
+      </OutlinedButton>
     </View>
   );
 }
@@ -117,16 +108,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.gray500,
     fontWeight: "600",
-  },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  actionButton: {
-    flex: 1,
-    margin: 0,
-    paddingHorizontal: 8,
   },
   mapImage: {
     width: "100%",

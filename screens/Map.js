@@ -5,10 +5,11 @@ import { useState, useLayoutEffect, useCallback } from "react";
 import IconButton from "../components/UI/IconButton";
 
 function Map({ navigation, route }) {
-  const initialLocation = route.params && {
-    lat: route.params.initialLat,
-    lng: route.params.initialLng,
-  };
+  const isReadOnly = route.params?.readOnly;
+  const initialLocation =
+    route.params?.initialLat != null && route.params?.initialLng != null
+      ? { lat: route.params.initialLat, lng: route.params.initialLng }
+      : null;
   const [selectedLocation, setSelectedLocation] = useState(initialLocation);
 
   const region = {
@@ -19,7 +20,7 @@ function Map({ navigation, route }) {
   };
 
   function handleSelectLocation(event) {
-    if (initialLocation) {
+    if (isReadOnly) {
       return;
     }
     const lat = event.nativeEvent.coordinate.latitude;
@@ -39,13 +40,13 @@ function Map({ navigation, route }) {
   }, [navigation, selectedLocation]);
 
   useLayoutEffect(() => {
-    if (initialLocation) {
+    if (isReadOnly) {
       return;
     }
     navigation.setOptions({
-      headerRight: () => <IconButton icon="save" size={24} onPress={savePickedLocationHandler} />,
+      headerRight: () => <IconButton icon="save" size={18} onPress={savePickedLocationHandler} />,
     });
-  }, [navigation, savePickedLocationHandler, initialLocation]);
+  }, [navigation, savePickedLocationHandler, isReadOnly]);
 
   return (
     <MapView initialRegion={region} style={styles.map} onPress={handleSelectLocation}>

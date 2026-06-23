@@ -7,11 +7,12 @@ A React Native app built with Expo for saving and browsing your favorite places.
 - **Places list** — View all saved places with photo, title, and address. The list refreshes when you return to the home screen.
 - **Add a place** — Form with title input, camera image picker, and location picker.
 - **Camera** — Take and preview a photo for each place (`expo-image-picker`).
-- **Location** — Get the device's current GPS coordinates or pick a spot on an interactive map (`expo-location`, `react-native-maps`).
+- **Location** — Tap **Get Location** to read GPS, open an interactive map centered on your position, adjust the pin if needed, and save (`expo-location`, `react-native-maps`).
 - **Map preview** — Static map image for the picked location via Google Maps Static API.
 - **Reverse geocoding** — Resolve coordinates to a human-readable address via Google Geocoding API.
 - **Place details** — Tap a place to see its full photo, address, and open its location on the map.
 - **Local persistence** — Places are saved in SQLite and survive app restarts (`expo-sqlite`).
+- **Pink UI** — Soft pink theme with rounded cards, pill buttons, and solid icon controls in the header.
 
 ## How it works
 
@@ -20,12 +21,23 @@ AllPlaces ──► tap + ──► AddPlace (PlaceForm)
                               │
                               ├── ImagePicker (camera)
                               ├── LocationPicker
-                              │       ├── Get Location (GPS)
-                              │       └── Pick on Map ──► Map
+                              │       └── Get Location (GPS) ──► Map (pick & save)
                               └── Save ──► SQLite
 
 AllPlaces ──► tap place ──► PlaceDetails ──► View on Map ──► Map (read-only)
 ```
+
+**Adding a location**
+
+1. On the add-place form, tap **Get Location**.
+2. The app requests location permission and reads your current GPS coordinates.
+3. The **Map** screen opens centered on that position with a marker.
+4. Tap elsewhere on the map to move the pin, then tap **✓** in the header to confirm.
+5. You return to the form with a static map preview and reverse-geocoded address.
+
+**Viewing a saved place on the map**
+
+From **Place Details**, **View on Map** opens the map in read-only mode (`readOnly: true`) — the pin is shown but cannot be moved and there is no save button.
 
 When adding a place, data is stored in the `Place` model and written to SQLite as flat columns (`title`, `imageUri`, `address`, `lat`, `lng`). When reading from the database, rows use `lat`/`lng` directly rather than a nested `location` object.
 
@@ -103,7 +115,7 @@ The app requests permissions at runtime:
 | Permission            | Used for                                              |
 | --------------------- | ----------------------------------------------------- |
 | Camera                | Taking photos for places                              |
-| Location (foreground) | Reading GPS coordinates for "Get Location"            |
+| Location (foreground) | GPS for **Get Location** and centering the map on your position |
 
 Camera permission text is configured in `app.json` via the `expo-image-picker` plugin.
 
@@ -111,27 +123,27 @@ Camera permission text is configured in `app.json` via the `expo-image-picker` p
 
 ```
 fav-places/
-├── App.js                     # Navigation stack, DB init, splash screen
+├── App.js                     # Navigation stack, DB init, splash screen, safe-area header
 ├── app.json                   # Expo config and plugins
 ├── constants/
-│   └── colors.js              # Theme colors
+│   └── colors.js              # Pink theme palette
 ├── components/
 │   ├── Places/
 │   │   ├── ImagePicker.js     # Camera capture and preview
-│   │   ├── LocationPicker.js  # GPS, map pick, static map preview
+│   │   ├── LocationPicker.js  # Get Location → Map, static map preview
 │   │   ├── PlaceForm.js       # Add-place form
 │   │   ├── PlaceItem.js       # Single place row (navigates to details)
 │   │   └── PlacesList.js      # FlatList of places
 │   └── UI/
 │       ├── Button.js
-│       ├── IconButton.js
-│       └── OutlinedButton.js  # Icon + label button
+│       ├── IconButton.js      # Header action buttons (circular, matches back button)
+│       └── OutlinedButton.js  # Solid-icon + label button
 ├── models/
 │   └── place.js               # Place data model
 ├── screens/
 │   ├── AllPlaces.js           # Home — loads and displays saved places
 │   ├── AddPlace.js            # Saves a new place to SQLite
-│   ├── Map.js                 # Interactive map (pick or view location)
+│   ├── Map.js                 # Interactive map (pick & save, or read-only view)
 │   └── PlaceDetails.js        # Place detail view with "View on Map"
 └── util/
     ├── database.js            # SQLite init, insert, fetch

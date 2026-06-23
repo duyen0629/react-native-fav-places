@@ -1,9 +1,10 @@
 import { FlatList, View, Text, StyleSheet } from "react-native";
 import PlaceItem from "./PlaceItem";
 import { Colors } from "../../constants/colors";
+import { ALL_CATEGORIES } from "./CategoryFilter";
 
-function PlacesList({ places }) {
-  if (!places || places.length === 0) {
+function PlacesList({ places, totalPlacesCount = 0, selectedCategory = ALL_CATEGORIES }) {
+  if (totalPlacesCount === 0) {
     return (
       <View style={styles.fallbackContainer}>
         <Text style={styles.fallbackTitle}>No favorites yet!</Text>
@@ -11,6 +12,18 @@ function PlacesList({ places }) {
       </View>
     );
   }
+
+  if (!places || places.length === 0) {
+    return (
+      <View style={styles.fallbackContainer}>
+        <Text style={styles.fallbackTitle}>No places found</Text>
+        <Text style={styles.fallbackText}>
+          No favorites in "{selectedCategory}" yet. Try another category or add a new place.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <FlatList
       style={styles.list}

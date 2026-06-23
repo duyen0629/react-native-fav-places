@@ -4,7 +4,7 @@ A React Native app built with Expo for saving and browsing your favorite places.
 
 ## Features
 
-- **Places list** — View all saved places with photo, title, and address. The list refreshes when you return to the home screen.
+- **Places list** — View all saved places with photo, title, address, and category. Filter by category on the home screen. The list refreshes when you return to the home screen.
 - **Add a place** — Form with auto-prefilled title (`Fav 1`, `Fav 2`, …), category picker, camera image picker, and location picker.
 - **Camera** — Take and preview a photo for each place (`expo-image-picker`).
 - **Location** — Tap **Get Location** to read GPS, open an interactive map centered on your position, adjust the pin if needed, and save (`expo-location`, `react-native-maps`).
@@ -142,6 +142,7 @@ fav-places/
 │   └── colors.js              # Pink theme palette
 ├── components/
 │   ├── Places/
+│   │   ├── CategoryFilter.js  # Home screen category filter chips
 │   │   ├── CategoryPicker.js  # Category dropdown selector
 │   │   ├── ImagePicker.js     # Camera capture and preview
 │   │   ├── LocationPicker.js  # Get Location → Map, static map preview

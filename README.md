@@ -5,7 +5,7 @@ A React Native app built with Expo for saving and browsing your favorite places.
 ## Features
 
 - **Places list** — View all saved places with photo, title, and address. The list refreshes when you return to the home screen.
-- **Add a place** — Form with title input, camera image picker, and location picker.
+- **Add a place** — Form with auto-prefilled title (`Fav 1`, `Fav 2`, …), camera image picker, and location picker.
 - **Camera** — Take and preview a photo for each place (`expo-image-picker`).
 - **Location** — Tap **Get Location** to read GPS, open an interactive map centered on your position, adjust the pin if needed, and save (`expo-location`, `react-native-maps`).
 - **Map preview** — Static map image for the picked location via Google Maps Static API.
@@ -17,23 +17,34 @@ A React Native app built with Expo for saving and browsing your favorite places.
 ## How it works
 
 ```
-AllPlaces ──► tap + ──► AddPlace (PlaceForm)
+AllPlaces ──► tap + ──► AddPlace (PlaceForm, fresh draft)
                               │
                               ├── ImagePicker (camera)
                               ├── LocationPicker
                               │       └── Get Location (GPS) ──► Map (pick & save)
-                              └── Save ──► SQLite
+                              │                                      │
+                              │                                      └── popTo AddPlace (keeps form data)
+                              └── Save ──► SQLite ──► popToTop ──► AllPlaces (no back button)
 
 AllPlaces ──► tap place ──► PlaceDetails ──► View on Map ──► Map (read-only)
 ```
 
-**Adding a location**
+**Adding a place**
 
-1. On the add-place form, tap **Get Location**.
-2. The app requests location permission and reads your current GPS coordinates.
-3. The **Map** screen opens centered on that position with a marker.
+1. Tap **+** on the home screen — the form opens with the title prefilled as `Fav {n}` (`n` = number of saved places + 1; e.g. 0 places → `Fav 1`).
+2. Optionally edit the title, take a photo, then tap **Get Location**.
+3. The app requests location permission, reads GPS, and opens **Map** centered on your position.
 4. Tap elsewhere on the map to move the pin, then tap **✓** in the header to confirm.
-5. You return to the form with a static map preview and reverse-geocoded address.
+5. You return to the add-place form with a static map preview and reverse-geocoded address. Title, photo, and other form data are preserved while visiting the map.
+6. Tap **Save My Place** — the place is written to SQLite and the app returns to **Favorite Places** via `popToTop()`, clearing the stack so no back button appears.
+
+**Form state & navigation**
+
+- **`util/addPlaceDraft.js`** — In-memory draft store keeps title, photo, and location while the add-place screen is inactive (e.g. when visiting the map).
+- **`resetForm: true`** — Passed when tapping **+** so each new add session starts with a fresh form and a new `Fav {n}` title.
+- **`popTo("AddPlace")`** — Map uses this to return to the existing add-place screen (instead of pushing a new one) and pass picked coordinates.
+- **`popToTop()`** — Called after a successful save to return to the root **Favorite Places** screen and remove Add Place / Map from the stack (no back button on the home screen).
+- **`freezeOnBlur`** — Enabled on the Add Place screen to help preserve form state when navigating away.
 
 **Viewing a saved place on the map**
 
@@ -131,7 +142,7 @@ fav-places/
 │   ├── Places/
 │   │   ├── ImagePicker.js     # Camera capture and preview
 │   │   ├── LocationPicker.js  # Get Location → Map, static map preview
-│   │   ├── PlaceForm.js       # Add-place form
+│   │   ├── PlaceForm.js       # Add-place form, title prefill, draft sync
 │   │   ├── PlaceItem.js       # Single place row (navigates to details)
 │   │   └── PlacesList.js      # FlatList of places
 │   └── UI/
@@ -142,11 +153,12 @@ fav-places/
 │   └── place.js               # Place data model
 ├── screens/
 │   ├── AllPlaces.js           # Home — loads and displays saved places
-│   ├── AddPlace.js            # Saves a new place to SQLite
+│   ├── AddPlace.js            # Saves a new place, clears draft, popToTop
 │   ├── Map.js                 # Interactive map (pick & save, or read-only view)
 │   └── PlaceDetails.js        # Place detail view with "View on Map"
 └── util/
-    ├── database.js            # SQLite init, insert, fetch
+    ├── addPlaceDraft.js       # In-memory form draft (title, photo, location)
+    ├── database.js            # SQLite init, insert, fetch, count
     └── location.js            # Google Static Maps URL + geocoding
 ```
 

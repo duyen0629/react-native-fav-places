@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import AllPlaces from "./screens/AllPlaces";
 import AddPlace from "./screens/AddPlace";
 import IconButton from "./components/UI/IconButton";
@@ -15,52 +16,34 @@ SplashScreen.preventAutoHideAsync();
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
-  const [dbInitialized, setDbInitialized] = useState(false);
-
-  useEffect(() => {
-    async function prepare() {
-      try {
-        await init();
-      } finally {
-        setDbInitialized(true);
-      }
-    }
-
-    prepare();
-  }, []);
-
-  useEffect(() => {
-    if (dbInitialized) {
-      SplashScreen.hideAsync();
-    }
-  }, [dbInitialized]);
-
-  if (!dbInitialized) {
-    return null;
-  }
+function RootNavigator() {
+  const insets = useSafeAreaInsets();
 
   return (
-    <>
-      <StatusBar style="light" />
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: Colors.primary500,
-            },
-            headerTintColor: Colors.textLight,
-            headerBackTitleVisible: false,
-            headerBackButtonDisplayMode: "minimal",
-            headerTitleStyle: {
-              fontWeight: "700",
-              fontSize: 18,
-            },
-            contentStyle: {
-              backgroundColor: Colors.background,
-            },
-          }}
-        >
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: Colors.primary500,
+          },
+          safeAreaInsets: {
+            top: insets.top + 10,
+            bottom: insets.bottom,
+            left: insets.left,
+            right: insets.right,
+          },
+          headerTintColor: Colors.textLight,
+          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: "minimal",
+          headerTitleStyle: {
+            fontWeight: "700",
+            fontSize: 18,
+          },
+          contentStyle: {
+            backgroundColor: Colors.background,
+          },
+        }}
+      >
           <Stack.Screen
             name="AllPlaces"
             component={AllPlaces}
@@ -88,6 +71,38 @@ export default function App() {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </>
+  );
+}
+
+export default function App() {
+  const [dbInitialized, setDbInitialized] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await init();
+      } finally {
+        setDbInitialized(true);
+      }
+    }
+
+    prepare();
+  }, []);
+
+  useEffect(() => {
+    if (dbInitialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [dbInitialized]);
+
+  if (!dbInitialized) {
+    return null;
+  }
+
+  return (
+    <SafeAreaProvider>
+      <StatusBar style="light" />
+      <RootNavigator />
+    </SafeAreaProvider>
   );
 }

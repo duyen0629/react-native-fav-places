@@ -7,32 +7,48 @@ import { getMapPreview } from "../../util/location";
 import { useNavigation, useRoute, useIsFocused } from "@react-navigation/native";
 import { getAddress } from "../../util/location";
 
-function LocationPicker({ onLocationPicked }) {
+function isValidLocation(location) {
+  return location?.lat != null && location?.lng != null;
+}
+
+function LocationPicker({ onLocationPicked, location }) {
   const route = useRoute();
   const navigation = useNavigation();
   const isFocused = useIsFocused();
-  const [pickedLocation, setPickedLocation] = useState(null);
+  const [pickedLocation, setPickedLocation] = useState(isValidLocation(location) ? location : null);
   const [locationPermissionInformation, requestPermission] = useForegroundPermissions();
 
   useEffect(() => {
-    if (isFocused && route.params) {
-      const mapPickedLocation = {
-        lat: route.params.pickedLat,
-        lng: route.params.pickedLng,
-      };
-
-      if (mapPickedLocation) {
-        setPickedLocation(mapPickedLocation);
-      }
+    if (isValidLocation(location)) {
+      setPickedLocation(location);
+    } else if (location == null) {
+      setPickedLocation(null);
     }
-  }, [route, isFocused]);
+  }, [location]);
+
+  useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+
+    const lat = route.params?.pickedLat;
+    const lng = route.params?.pickedLng;
+
+    if (lat == null || lng == null) {
+      return;
+    }
+
+    setPickedLocation({ lat, lng });
+    navigation.setParams({ pickedLat: undefined, pickedLng: undefined });
+  }, [isFocused, route.params?.pickedLat, route.params?.pickedLng, navigation]);
 
   useEffect(() => {
     async function handleLocation() {
-      if (pickedLocation) {
-        const address = await getAddress(pickedLocation.lat, pickedLocation.lng);
-        onLocationPicked({ ...pickedLocation, address });
+      if (!isValidLocation(pickedLocation)) {
+        return;
       }
+      const address = await getAddress(pickedLocation.lat, pickedLocation.lng);
+      onLocationPicked({ ...pickedLocation, address });
     }
     handleLocation();
   }, [pickedLocation, onLocationPicked]);
@@ -54,14 +70,14 @@ function LocationPicker({ onLocationPicked }) {
     if (!hasPermission) {
       return;
     }
-    const location = await getCurrentPositionAsync();
-    if (!location) {
+    const locationResult = await getCurrentPositionAsync();
+    if (!locationResult) {
       Alert.alert("Could not get location!", "Please try again later.");
       return;
     }
     navigation.navigate("Map", {
-      initialLat: location.coords.latitude,
-      initialLng: location.coords.longitude,
+      initialLat: locationResult.coords.latitude,
+      initialLng: locationResult.coords.longitude,
     });
   }
 
@@ -70,7 +86,7 @@ function LocationPicker({ onLocationPicked }) {
       <Text style={styles.placeholderText}>Where is your happy place?</Text>
     </View>
   );
-  if (pickedLocation) {
+  if (isValidLocation(pickedLocation)) {
     const imagePreviewUrl = getMapPreview(pickedLocation.lat, pickedLocation.lng);
     locationPreview = <Image source={{ uri: imagePreviewUrl }} style={styles.mapImage} />;
   }

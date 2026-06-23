@@ -53,7 +53,7 @@ function PlaceForm({ onCreatePlace }) {
       setSelectedImage(null);
       setPickedLocation(null);
       updateAddPlaceDraft({ enteredTitle: title, selectedImage: null, pickedLocation: null });
-      navigation.setParams({ resetForm: undefined });
+      navigation.setParams({ resetForm: undefined, pickedLat: undefined, pickedLng: undefined });
     }
 
     resetForm();
@@ -107,7 +107,7 @@ function PlaceForm({ onCreatePlace }) {
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>🎀 Location</Text>
-        <LocationPicker onLocationPicked={pickLocationHandler} />
+        <LocationPicker onLocationPicked={pickLocationHandler} location={pickedLocation} />
       </View>
       <Button onPress={savePlaceHandler}>Save My Place </Button>
     </ScrollView>

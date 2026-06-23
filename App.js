@@ -50,6 +50,8 @@ export default function App() {
               backgroundColor: Colors.primary500,
             },
             headerTintColor: Colors.textLight,
+            headerBackTitleVisible: false,
+            headerBackButtonDisplayMode: "minimal",
             headerTitleStyle: {
               fontWeight: "700",
               fontSize: 18,

@@ -70,7 +70,8 @@ function PlaceDetails({ route, navigation }) {
         <Image source={{ uri: loadedPlace.imageUri }} style={styles.image} />
       </View>
       <View style={styles.addressCard}>
-        <Text style={styles.addressLabel}>🎀 Address</Text>
+        <Text style={styles.category}>{loadedPlace.category}</Text>
+        <Text style={styles.addressLabel}>Address</Text>
         <Text style={styles.address}>{loadedPlace.address}</Text>
       </View>
       <View style={styles.actions}>
@@ -130,6 +131,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     borderLeftWidth: 4,
     borderLeftColor: Colors.primary400,
+  },
+  category: {
+    alignSelf: "flex-start",
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.primary700,
+    backgroundColor: Colors.primary50,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    marginBottom: 12,
+    overflow: "hidden",
   },
   addressLabel: {
     fontSize: 13,

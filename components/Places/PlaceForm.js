@@ -4,10 +4,12 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
+import CategoryPicker from "./CategoryPicker";
 import Button from "../UI/Button";
 import Place from "../../models/place";
 import { fetchPlaceCount } from "../../util/database";
 import { getAddPlaceDraft, updateAddPlaceDraft, resetAddPlaceDraft } from "../../util/addPlaceDraft";
+import { DEFAULT_CATEGORY } from "../../constants/categories";
 
 function PlaceForm({ onCreatePlace }) {
   const route = useRoute();
@@ -15,6 +17,7 @@ function PlaceForm({ onCreatePlace }) {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [pickedLocation, setPickedLocation] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
 
   useEffect(() => {
     async function initForm() {
@@ -28,13 +31,20 @@ function PlaceForm({ onCreatePlace }) {
         setEnteredTitle(draft.enteredTitle);
         setSelectedImage(draft.selectedImage);
         setPickedLocation(draft.pickedLocation);
+        setSelectedCategory(draft.selectedCategory ?? DEFAULT_CATEGORY);
         return;
       }
 
       const count = await fetchPlaceCount();
       const title = `Fav ${count + 1}`;
       setEnteredTitle(title);
-      updateAddPlaceDraft({ enteredTitle: title, selectedImage: null, pickedLocation: null });
+      setSelectedCategory(DEFAULT_CATEGORY);
+      updateAddPlaceDraft({
+        enteredTitle: title,
+        selectedImage: null,
+        pickedLocation: null,
+        selectedCategory: DEFAULT_CATEGORY,
+      });
     }
 
     initForm();
@@ -52,7 +62,13 @@ function PlaceForm({ onCreatePlace }) {
       setEnteredTitle(title);
       setSelectedImage(null);
       setPickedLocation(null);
-      updateAddPlaceDraft({ enteredTitle: title, selectedImage: null, pickedLocation: null });
+      setSelectedCategory(DEFAULT_CATEGORY);
+      updateAddPlaceDraft({
+        enteredTitle: title,
+        selectedImage: null,
+        pickedLocation: null,
+        selectedCategory: DEFAULT_CATEGORY,
+      });
       navigation.setParams({ resetForm: undefined, pickedLat: undefined, pickedLng: undefined });
     }
 
@@ -71,6 +87,10 @@ function PlaceForm({ onCreatePlace }) {
     updateAddPlaceDraft({ pickedLocation });
   }, [pickedLocation]);
 
+  useEffect(() => {
+    updateAddPlaceDraft({ selectedCategory });
+  }, [selectedCategory]);
+
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);
   }
@@ -85,7 +105,7 @@ function PlaceForm({ onCreatePlace }) {
   );
 
   function savePlaceHandler() {
-    const placeData = new Place(enteredTitle, selectedImage, pickedLocation);
+    const placeData = new Place(enteredTitle, selectedImage, pickedLocation, selectedCategory);
     onCreatePlace(placeData);
   }
 
@@ -100,6 +120,8 @@ function PlaceForm({ onCreatePlace }) {
           placeholder="Name your cozy spot..."
           placeholderTextColor={Colors.gray500}
         />
+        <Text style={[styles.sectionLabel, styles.fieldSpacing]}>Category</Text>
+        <CategoryPicker selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>🌸 Photo</Text>
@@ -143,6 +165,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: Colors.gray700,
     marginBottom: 12,
+  },
+  fieldSpacing: {
+    marginTop: 16,
   },
   input: {
     marginVertical: 4,

@@ -12,6 +12,7 @@ function PlaceItem({ place }) {
     <Pressable style={({ pressed }) => [styles.item, pressed && styles.pressed]} onPress={selectPlaceHandler}>
       <Image source={{ uri: place.imageUri }} style={styles.image} />
       <View style={styles.info}>
+        <Text style={styles.category}>{place.category}</Text>
         <Text style={styles.title}>{place.title}</Text>
         <Text style={styles.address} numberOfLines={2}>
           {place.address}
@@ -60,6 +61,14 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: Colors.gray700,
     marginBottom: 4,
+  },
+  category: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: Colors.primary700,
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   address: {
     fontSize: 13,

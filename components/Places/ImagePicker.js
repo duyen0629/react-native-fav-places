@@ -32,12 +32,12 @@ function ImagePicker({ onImageTaken, imageUri }) {
   }
 
   let imagePreview = (
-    <View style={styles.imagePreview}>
+    <View style={[styles.imagePreview, styles.placeholderPreview]}>
       <Text style={styles.placeholderText}>Capture a sweet memory!</Text>
     </View>
   );
   if (imageUri) {
-    imagePreview = <Image style={styles.imagePreview} source={{ uri: imageUri }} />;
+    imagePreview = <Image style={[styles.imagePreview, styles.filledPreview]} source={{ uri: imageUri }} />;
   }
   return (
     <View>
@@ -59,7 +59,6 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     width: "100%",
-    height: 180,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.surfaceSoft,
@@ -67,6 +66,13 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary200,
     borderStyle: "dashed",
     borderRadius: 20,
+  },
+  placeholderPreview: {
+    height: 90,
+  },
+  filledPreview: {
+    height: 180,
+    borderStyle: "solid",
   },
   placeholderText: {
     fontSize: 14,

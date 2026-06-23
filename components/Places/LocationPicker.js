@@ -81,18 +81,22 @@ function LocationPicker({ onLocationPicked, location }) {
     });
   }
 
+  const hasLocation = isValidLocation(pickedLocation);
+
   let locationPreview = (
     <View style={styles.placeholder}>
       <Text style={styles.placeholderText}>Where is your happy place?</Text>
     </View>
   );
-  if (isValidLocation(pickedLocation)) {
+  if (hasLocation) {
     const imagePreviewUrl = getMapPreview(pickedLocation.lat, pickedLocation.lng);
     locationPreview = <Image source={{ uri: imagePreviewUrl }} style={styles.mapImage} />;
   }
   return (
     <View>
-      <View style={styles.mapPreview}>{locationPreview}</View>
+      <View style={[styles.mapPreview, hasLocation ? styles.filledPreview : styles.placeholderPreview]}>
+        {locationPreview}
+      </View>
       <OutlinedButton icon="location" onPress={getLocationHandler}>
         Get Location
       </OutlinedButton>
@@ -105,7 +109,6 @@ export default LocationPicker;
 const styles = StyleSheet.create({
   mapPreview: {
     width: "100%",
-    height: 180,
     marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -116,9 +119,17 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary200,
     borderStyle: "dashed",
   },
+  placeholderPreview: {
+    height: 90,
+  },
+  filledPreview: {
+    height: 180,
+    borderStyle: "solid",
+  },
   placeholder: {
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 16,
   },
   placeholderText: {
     fontSize: 14,

@@ -5,7 +5,7 @@ A React Native app built with Expo for saving and browsing your favorite places.
 ## Features
 
 - **Places list** — View all saved places with photo, title, and address. The list refreshes when you return to the home screen.
-- **Add a place** — Form with auto-prefilled title (`Fav 1`, `Fav 2`, …), camera image picker, and location picker.
+- **Add a place** — Form with auto-prefilled title (`Fav 1`, `Fav 2`, …), category picker, camera image picker, and location picker.
 - **Camera** — Take and preview a photo for each place (`expo-image-picker`).
 - **Location** — Tap **Get Location** to read GPS, open an interactive map centered on your position, adjust the pin if needed, and save (`expo-location`, `react-native-maps`).
 - **Map preview** — Static map image for the picked location via Google Maps Static API.
@@ -32,15 +32,16 @@ AllPlaces ──► tap place ──► PlaceDetails ──► View on Map ─�
 **Adding a place**
 
 1. Tap **+** on the home screen — the form opens with the title prefilled as `Fav {n}` (`n` = number of saved places + 1; e.g. 0 places → `Fav 1`).
-2. Optionally edit the title, take a photo, then tap **Get Location**.
-3. The app requests location permission, reads GPS, and opens **Map** centered on your position.
-4. Tap elsewhere on the map to move the pin, then tap **✓** in the header to confirm.
-5. You return to the add-place form with a static map preview and reverse-geocoded address. Title, photo, and other form data are preserved while visiting the map.
-6. Tap **Save My Place** — the place is written to SQLite and the app returns to **Favorite Places** via `popToTop()`, clearing the stack so no back button appears.
+2. Choose a **category** (Restaurant / Cafe, Entertainment, Shopping, etc.).
+3. Optionally edit the title, take a photo, then tap **Get Location**.
+4. The app requests location permission, reads GPS, and opens **Map** centered on your position.
+5. Tap elsewhere on the map to move the pin, then tap **✓** in the header to confirm.
+6. You return to the add-place form with a static map preview and reverse-geocoded address. Title, photo, category, and other form data are preserved while visiting the map.
+7. Tap **Save My Place** — the place is written to SQLite and the app returns to **Favorite Places** via `popToTop()`, clearing the stack so no back button appears.
 
 **Form state & navigation**
 
-- **`util/addPlaceDraft.js`** — In-memory draft store keeps title, photo, and location while the add-place screen is inactive (e.g. when visiting the map).
+- **`util/addPlaceDraft.js`** — In-memory draft store keeps title, category, photo, and location while the add-place screen is inactive (e.g. when visiting the map).
 - **`resetForm: true`** — Passed when tapping **+** so each new add session starts with a fresh form and a new `Fav {n}` title.
 - **`popTo("AddPlace")`** — Map uses this to return to the existing add-place screen (instead of pushing a new one) and pass picked coordinates.
 - **`popToTop()`** — Called after a successful save to return to the root **Favorite Places** screen and remove Add Place / Map from the stack (no back button on the home screen).
@@ -137,9 +138,11 @@ fav-places/
 ├── App.js                     # Navigation stack, DB init, splash screen, safe-area header
 ├── app.json                   # Expo config and plugins
 ├── constants/
+│   ├── categories.js          # Place category list
 │   └── colors.js              # Pink theme palette
 ├── components/
 │   ├── Places/
+│   │   ├── CategoryPicker.js  # Category dropdown selector
 │   │   ├── ImagePicker.js     # Camera capture and preview
 │   │   ├── LocationPicker.js  # Get Location → Map, static map preview
 │   │   ├── PlaceForm.js       # Add-place form, title prefill, draft sync
@@ -174,6 +177,7 @@ Places are stored in a local SQLite database (`places.db`):
 | `address`  | TEXT    | Reverse-geocoded address |
 | `lat`      | REAL    | Latitude                 |
 | `lng`      | REAL    | Longitude                |
+| `category` | TEXT    | Place category           |
 
 ## Environment variables
 

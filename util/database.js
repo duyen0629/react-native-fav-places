@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { DEFAULT_CATEGORY } from "../constants/categories";
 
 let database;
 
@@ -18,20 +19,18 @@ export async function init() {
       imageUri TEXT NOT NULL,
       address TEXT NOT NULL,
       lat REAL NOT NULL,
-      lng REAL NOT NULL
+      lng REAL NOT NULL,
+      category TEXT NOT NULL DEFAULT '${DEFAULT_CATEGORY}'
     );
   `);
 }
 
 export async function insertPlace(place) {
   const db = await getDatabase();
-  const result = await db.runAsync(`INSERT INTO places (title, imageUri, address, lat, lng) VALUES (?, ?, ?, ?, ?)`, [
-    place.title,
-    place.imageUri,
-    place.address,
-    place.location.lat,
-    place.location.lng,
-  ]);
+  const result = await db.runAsync(
+    `INSERT INTO places (title, imageUri, address, lat, lng, category) VALUES (?, ?, ?, ?, ?, ?)`,
+    [place.title, place.imageUri, place.address, place.location.lat, place.location.lng, place.category],
+  );
   return result;
 }
 

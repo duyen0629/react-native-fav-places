@@ -1,13 +1,16 @@
+import { Alert } from "react-native";
 import PlaceForm from "../components/Places/PlaceForm";
 import { insertPlace } from "../util/database";
+import { resetAddPlaceDraft } from "../util/addPlaceDraft";
 
 function AddPlace({ navigation }) {
   function createPlaceHandler(placeData) {
     insertPlace(placeData)
       .then(() => {
+        resetAddPlaceDraft();
         navigation.navigate("AllPlaces");
       })
-      .catch((error) => {
+      .catch(() => {
         Alert.alert("Could not save place. Please try again later.");
       });
   }

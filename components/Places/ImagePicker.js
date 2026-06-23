@@ -1,11 +1,9 @@
-import { View, Image, Text, StyleSheet } from "react-native";
+import { View, Image, Text, StyleSheet, Alert } from "react-native";
 import { launchCameraAsync, useCameraPermissions, PermissionStatus } from "expo-image-picker";
-import { useState } from "react";
 import { Colors } from "../../constants/colors";
 import OutlinedButton from "../UI/OutlinedButton";
 
-function ImagePicker({ onImageTaken }) {
-  const [pickedImage, setPickedImage] = useState(null);
+function ImagePicker({ onImageTaken, imageUri }) {
   const [cameraPermissionInformation, requestPermission] = useCameraPermissions();
 
   async function verifyPermissions() {
@@ -30,7 +28,6 @@ function ImagePicker({ onImageTaken }) {
       aspect: [16, 9],
       quality: 0.5,
     });
-    setPickedImage(image.assets[0].uri);
     onImageTaken(image.assets[0].uri);
   }
 
@@ -39,8 +36,8 @@ function ImagePicker({ onImageTaken }) {
       <Text style={styles.placeholderText}>Capture a sweet memory!</Text>
     </View>
   );
-  if (pickedImage) {
-    imagePreview = <Image style={styles.imagePreview} source={{ uri: pickedImage }} />;
+  if (imageUri) {
+    imagePreview = <Image style={styles.imagePreview} source={{ uri: imageUri }} />;
   }
   return (
     <View>

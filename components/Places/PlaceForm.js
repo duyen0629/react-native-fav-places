@@ -1,25 +1,75 @@
 import { View, Text, ScrollView, TextInput, StyleSheet } from "react-native";
 import { useState, useCallback, useEffect } from "react";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
 import Button from "../UI/Button";
 import Place from "../../models/place";
 import { fetchPlaceCount } from "../../util/database";
+import { getAddPlaceDraft, updateAddPlaceDraft, resetAddPlaceDraft } from "../../util/addPlaceDraft";
 
 function PlaceForm({ onCreatePlace }) {
+  const route = useRoute();
+  const navigation = useNavigation();
   const [enteredTitle, setEnteredTitle] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [pickedLocation, setPickedLocation] = useState(null);
 
   useEffect(() => {
-    async function loadDefaultTitle() {
+    async function initForm() {
+      if (route.params?.resetForm) {
+        resetAddPlaceDraft();
+      }
+
+      const draft = getAddPlaceDraft();
+
+      if (!route.params?.resetForm && (draft.enteredTitle || draft.selectedImage || draft.pickedLocation)) {
+        setEnteredTitle(draft.enteredTitle);
+        setSelectedImage(draft.selectedImage);
+        setPickedLocation(draft.pickedLocation);
+        return;
+      }
+
       const count = await fetchPlaceCount();
-      setEnteredTitle(`Fav ${count + 1}`);
+      const title = `Fav ${count + 1}`;
+      setEnteredTitle(title);
+      updateAddPlaceDraft({ enteredTitle: title, selectedImage: null, pickedLocation: null });
     }
 
-    loadDefaultTitle();
+    initForm();
   }, []);
+
+  useEffect(() => {
+    if (!route.params?.resetForm) {
+      return;
+    }
+
+    async function resetForm() {
+      resetAddPlaceDraft();
+      const count = await fetchPlaceCount();
+      const title = `Fav ${count + 1}`;
+      setEnteredTitle(title);
+      setSelectedImage(null);
+      setPickedLocation(null);
+      updateAddPlaceDraft({ enteredTitle: title, selectedImage: null, pickedLocation: null });
+      navigation.setParams({ resetForm: undefined });
+    }
+
+    resetForm();
+  }, [route.params?.resetForm, navigation]);
+
+  useEffect(() => {
+    updateAddPlaceDraft({ enteredTitle });
+  }, [enteredTitle]);
+
+  useEffect(() => {
+    updateAddPlaceDraft({ selectedImage });
+  }, [selectedImage]);
+
+  useEffect(() => {
+    updateAddPlaceDraft({ pickedLocation });
+  }, [pickedLocation]);
 
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);
@@ -53,7 +103,7 @@ function PlaceForm({ onCreatePlace }) {
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>🌸 Photo</Text>
-        <ImagePicker onImageTaken={takeImageHandler} />
+        <ImagePicker onImageTaken={takeImageHandler} imageUri={selectedImage} />
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>🎀 Location</Text>

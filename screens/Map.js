@@ -33,7 +33,7 @@ function Map({ navigation, route }) {
       Alert.alert("No location picked!", "Please press on the map to pick a location.");
       return;
     }
-    navigation.navigate("AddPlace", {
+    navigation.popTo("AddPlace", {
       pickedLat: selectedLocation.lat,
       pickedLng: selectedLocation.lng,
     });

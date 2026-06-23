@@ -50,7 +50,7 @@ function RootNavigator() {
             options={({ navigation }) => ({
               title: "Favorite Places",
               headerRight: () => (
-                <IconButton icon="add" size={20} onPress={() => navigation.navigate("AddPlace")} />
+                <IconButton icon="add" size={20} onPress={() => navigation.navigate("AddPlace", { resetForm: true })} />
               ),
             })}
           />
@@ -59,6 +59,7 @@ function RootNavigator() {
             component={AddPlace}
             options={{
               title: "Add a New Place",
+              freezeOnBlur: true,
             }}
           />
           <Stack.Screen name="Map" component={Map} />

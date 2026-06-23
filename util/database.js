@@ -41,3 +41,9 @@ export async function fetchPlaces() {
   const result = await db.getAllAsync("SELECT * FROM places");
   return result;
 }
+
+export async function fetchPlaceById(id) {
+  const db = await getDatabase();
+  const place = await db.getFirstAsync("SELECT * FROM places WHERE id = ?", [id]);
+  return place;
+}

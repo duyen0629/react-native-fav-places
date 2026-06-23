@@ -1,15 +1,25 @@
 import { View, Text, ScrollView, TextInput, StyleSheet } from "react-native";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Colors } from "../../constants/colors";
 import ImagePicker from "./ImagePicker";
 import LocationPicker from "./LocationPicker";
 import Button from "../UI/Button";
 import Place from "../../models/place";
+import { fetchPlaceCount } from "../../util/database";
 
 function PlaceForm({ onCreatePlace }) {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [pickedLocation, setPickedLocation] = useState(null);
+
+  useEffect(() => {
+    async function loadDefaultTitle() {
+      const count = await fetchPlaceCount();
+      setEnteredTitle(`Fav ${count + 1}`);
+    }
+
+    loadDefaultTitle();
+  }, []);
 
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);

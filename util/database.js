@@ -41,6 +41,12 @@ export async function fetchPlaces() {
   return result;
 }
 
+export async function fetchPlaceCount() {
+  const db = await getDatabase();
+  const result = await db.getFirstAsync("SELECT COUNT(*) as count FROM places");
+  return result.count;
+}
+
 export async function fetchPlaceById(id) {
   const db = await getDatabase();
   const place = await db.getFirstAsync("SELECT * FROM places WHERE id = ?", [id]);

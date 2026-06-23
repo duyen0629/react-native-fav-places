@@ -47,3 +47,8 @@ export async function fetchPlaceById(id) {
   const place = await db.getFirstAsync("SELECT * FROM places WHERE id = ?", [id]);
   return place;
 }
+
+export async function deletePlace(id) {
+  const db = await getDatabase();
+  await db.runAsync("DELETE FROM places WHERE id = ?", [id]);
+}

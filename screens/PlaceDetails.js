@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Image } from "react-native";
-import { ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, Alert } from "react-native";
 import OutlinedButton from "../components/UI/OutlinedButton";
+import IconButton from "../components/UI/IconButton";
 import { Colors } from "../constants/colors";
-import { useEffect, useState } from "react";
-import { fetchPlaceById } from "../util/database";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { deletePlace, fetchPlaceById } from "../util/database";
 
 function PlaceDetails({ route, navigation }) {
   const selectedPlaceId = route.params.placeId;
@@ -20,13 +20,41 @@ function PlaceDetails({ route, navigation }) {
     async function loadPlaceData() {
       const place = await fetchPlaceById(selectedPlaceId);
       setLoadedPlace(place);
-      navigation.setOptions({
-        title: place.title,
-      });
     }
 
     loadPlaceData();
   }, [selectedPlaceId]);
+
+  useLayoutEffect(() => {
+    if (!loadedPlace) {
+      return;
+    }
+
+    navigation.setOptions({
+      title: loadedPlace.title,
+      headerRight: ({ tintColor }) => (
+        <IconButton icon="trash" size={24} color={tintColor} onPress={deletePlaceHandler} />
+      ),
+    });
+  }, [navigation, loadedPlace, selectedPlaceId]);
+
+  function deletePlaceHandler() {
+    Alert.alert("Delete Place", "Are you sure you want to delete this place?", [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deletePlace(selectedPlaceId);
+            navigation.goBack();
+          } catch {
+            Alert.alert("Error", "Could not delete place. Please try again.");
+          }
+        },
+      },
+    ]);
+  }
 
   if (!loadedPlace) {
     return (

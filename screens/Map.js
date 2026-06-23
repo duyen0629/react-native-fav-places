@@ -43,7 +43,7 @@ function Map({ navigation, route }) {
       return;
     }
     navigation.setOptions({
-      headerRight: () => <IconButton icon="save" size={18} onPress={savePickedLocationHandler} />,
+      headerRight: () => <IconButton icon="save" size={24} onPress={savePickedLocationHandler} />,
     });
   }, [navigation, savePickedLocationHandler, initialLocation]);
 

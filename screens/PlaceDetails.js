@@ -32,7 +32,7 @@ function PlaceDetails({ route, navigation }) {
 
     navigation.setOptions({
       title: loadedPlace.title,
-      headerRight: () => <IconButton icon="trash" size={18} onPress={deletePlaceHandler} />,
+      headerRight: () => <IconButton icon="trash" size={24} onPress={deletePlaceHandler} />,
     });
   }, [navigation, loadedPlace, selectedPlaceId]);
 

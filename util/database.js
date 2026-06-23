@@ -32,7 +32,6 @@ export async function insertPlace(place) {
     place.location.lat,
     place.location.lng,
   ]);
-  console.log(result);
   return result;
 }
 

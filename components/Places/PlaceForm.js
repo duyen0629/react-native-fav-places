@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TextInput, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TextInput, StyleSheet, Alert } from "react-native";
 import { useState, useCallback, useEffect } from "react";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Colors } from "../../constants/colors";
@@ -11,16 +11,38 @@ import { fetchPlaceCount } from "../../util/database";
 import { getAddPlaceDraft, updateAddPlaceDraft, resetAddPlaceDraft } from "../../util/addPlaceDraft";
 import { DEFAULT_CATEGORY } from "../../constants/categories";
 
-function PlaceForm({ onCreatePlace }) {
+function placeToFormState(place) {
+  return {
+    enteredTitle: place.title,
+    selectedImage: place.imageUri,
+    pickedLocation: {
+      lat: place.lat,
+      lng: place.lng,
+      address: place.address,
+    },
+    selectedCategory: place.category ?? DEFAULT_CATEGORY,
+  };
+}
+
+function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My Place" }) {
   const route = useRoute();
   const navigation = useNavigation();
-  const [enteredTitle, setEnteredTitle] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [pickedLocation, setPickedLocation] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
+  const isEditing = initialPlace != null;
+  const initialFormState = initialPlace ? placeToFormState(initialPlace) : null;
+  const [enteredTitle, setEnteredTitle] = useState(initialFormState?.enteredTitle ?? "");
+  const [selectedImage, setSelectedImage] = useState(initialFormState?.selectedImage ?? null);
+  const [pickedLocation, setPickedLocation] = useState(initialFormState?.pickedLocation ?? null);
+  const [selectedCategory, setSelectedCategory] = useState(initialFormState?.selectedCategory ?? DEFAULT_CATEGORY);
+  const [formReady, setFormReady] = useState(isEditing);
 
   useEffect(() => {
     async function initForm() {
+      if (isEditing) {
+        updateAddPlaceDraft(placeToFormState(initialPlace));
+        setFormReady(true);
+        return;
+      }
+
       if (route.params?.resetForm) {
         resetAddPlaceDraft();
       }
@@ -32,6 +54,7 @@ function PlaceForm({ onCreatePlace }) {
         setSelectedImage(draft.selectedImage);
         setPickedLocation(draft.pickedLocation);
         setSelectedCategory(draft.selectedCategory ?? DEFAULT_CATEGORY);
+        setFormReady(true);
         return;
       }
 
@@ -45,13 +68,14 @@ function PlaceForm({ onCreatePlace }) {
         pickedLocation: null,
         selectedCategory: DEFAULT_CATEGORY,
       });
+      setFormReady(true);
     }
 
     initForm();
-  }, []);
+  }, [isEditing, initialPlace]);
 
   useEffect(() => {
-    if (!route.params?.resetForm) {
+    if (isEditing || !route.params?.resetForm) {
       return;
     }
 
@@ -73,23 +97,35 @@ function PlaceForm({ onCreatePlace }) {
     }
 
     resetForm();
-  }, [route.params?.resetForm, navigation]);
+  }, [route.params?.resetForm, navigation, isEditing]);
 
   useEffect(() => {
+    if (!formReady) {
+      return;
+    }
     updateAddPlaceDraft({ enteredTitle });
-  }, [enteredTitle]);
+  }, [enteredTitle, formReady]);
 
   useEffect(() => {
+    if (!formReady) {
+      return;
+    }
     updateAddPlaceDraft({ selectedImage });
-  }, [selectedImage]);
+  }, [selectedImage, formReady]);
 
   useEffect(() => {
+    if (!formReady) {
+      return;
+    }
     updateAddPlaceDraft({ pickedLocation });
-  }, [pickedLocation]);
+  }, [pickedLocation, formReady]);
 
   useEffect(() => {
+    if (!formReady) {
+      return;
+    }
     updateAddPlaceDraft({ selectedCategory });
-  }, [selectedCategory]);
+  }, [selectedCategory, formReady]);
 
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);
@@ -105,7 +141,20 @@ function PlaceForm({ onCreatePlace }) {
   );
 
   function savePlaceHandler() {
-    const placeData = new Place(enteredTitle, selectedImage, pickedLocation, selectedCategory);
+    if (!enteredTitle?.trim()) {
+      Alert.alert("Missing title", "Please enter a title for this place.");
+      return;
+    }
+    if (!selectedImage) {
+      Alert.alert("Missing photo", "Please take a photo for this place.");
+      return;
+    }
+    if (pickedLocation?.lat == null || pickedLocation?.lng == null) {
+      Alert.alert("Missing location", "Please pick a location for this place.");
+      return;
+    }
+
+    const placeData = new Place(enteredTitle.trim(), selectedImage, pickedLocation, selectedCategory);
     onCreatePlace(placeData);
   }
 
@@ -131,7 +180,7 @@ function PlaceForm({ onCreatePlace }) {
         <Text style={styles.sectionLabel}>🎀 Location</Text>
         <LocationPicker onLocationPicked={pickLocationHandler} location={pickedLocation} />
       </View>
-      <Button onPress={savePlaceHandler}>Save My Place </Button>
+      <Button onPress={savePlaceHandler}>{submitLabel}</Button>
     </ScrollView>
   );
 }

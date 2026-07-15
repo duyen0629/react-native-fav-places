@@ -11,6 +11,7 @@ import { init } from "./util/database";
 import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import PlaceDetails from "./screens/PlaceDetails";
+import EditPlace from "./screens/EditPlace";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,6 +60,14 @@ function RootNavigator() {
             component={AddPlace}
             options={{
               title: "Add a New Place",
+              freezeOnBlur: true,
+            }}
+          />
+          <Stack.Screen
+            name="EditPlace"
+            component={EditPlace}
+            options={{
+              title: "Edit Place",
               freezeOnBlur: true,
             }}
           />

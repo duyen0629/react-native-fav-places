@@ -8,6 +8,7 @@ const SOLID_ICONS = {
   location: "location",
   trash: "trash",
   save: "checkmark",
+  edit: "create",
 };
 
 function IconButton({ icon, size = 24, onPress }) {

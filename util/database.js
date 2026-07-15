@@ -34,6 +34,15 @@ export async function insertPlace(place) {
   return result;
 }
 
+export async function updatePlace(id, place) {
+  const db = await getDatabase();
+  const result = await db.runAsync(
+    `UPDATE places SET title = ?, imageUri = ?, address = ?, lat = ?, lng = ?, category = ? WHERE id = ?`,
+    [place.title, place.imageUri, place.address, place.location.lat, place.location.lng, place.category, id],
+  );
+  return result;
+}
+
 export async function fetchPlaces() {
   const db = await getDatabase();
   const result = await db.getAllAsync("SELECT * FROM places");

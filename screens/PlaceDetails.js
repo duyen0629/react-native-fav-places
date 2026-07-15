@@ -4,10 +4,12 @@ import IconButton from "../components/UI/IconButton";
 import { Colors } from "../constants/colors";
 import { getCategoryIcon } from "../constants/categories";
 import { useEffect, useLayoutEffect, useState } from "react";
+import { useIsFocused } from "@react-navigation/native";
 import { deletePlace, fetchPlaceById } from "../util/database";
 
 function PlaceDetails({ route, navigation }) {
   const selectedPlaceId = route.params.placeId;
+  const isFocused = useIsFocused();
   const [loadedPlace, setLoadedPlace] = useState(null);
 
   function showOnMapHandler() {
@@ -18,14 +20,20 @@ function PlaceDetails({ route, navigation }) {
     });
   }
 
+  function editPlaceHandler() {
+    navigation.navigate("EditPlace", { placeId: selectedPlaceId });
+  }
+
   useEffect(() => {
     async function loadPlaceData() {
       const place = await fetchPlaceById(selectedPlaceId);
       setLoadedPlace(place);
     }
 
-    loadPlaceData();
-  }, [selectedPlaceId]);
+    if (isFocused) {
+      loadPlaceData();
+    }
+  }, [selectedPlaceId, isFocused]);
 
   useLayoutEffect(() => {
     if (!loadedPlace) {
@@ -34,7 +42,12 @@ function PlaceDetails({ route, navigation }) {
 
     navigation.setOptions({
       title: loadedPlace.title,
-      headerRight: () => <IconButton icon="trash" size={22} onPress={deletePlaceHandler} />,
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <IconButton icon="edit" size={20} onPress={editPlaceHandler} />
+          <IconButton icon="trash" size={22} onPress={deletePlaceHandler} />
+        </View>
+      ),
     });
   }, [navigation, loadedPlace, selectedPlaceId]);
 
@@ -110,6 +123,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.gray500,
     fontWeight: "500",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   imageWrapper: {
     margin: 16,

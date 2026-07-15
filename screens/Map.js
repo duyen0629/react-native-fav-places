@@ -28,16 +28,18 @@ function Map({ navigation, route }) {
     setSelectedLocation({ lat, lng });
   }
 
+  const returnScreen = route.params?.returnScreen ?? "AddPlace";
+
   const savePickedLocationHandler = useCallback(() => {
     if (!selectedLocation) {
       Alert.alert("No location picked!", "Please press on the map to pick a location.");
       return;
     }
-    navigation.popTo("AddPlace", {
+    navigation.popTo(returnScreen, {
       pickedLat: selectedLocation.lat,
       pickedLng: selectedLocation.lng,
     });
-  }, [navigation, selectedLocation]);
+  }, [navigation, selectedLocation, returnScreen]);
 
   useLayoutEffect(() => {
     if (isReadOnly) {

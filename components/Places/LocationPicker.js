@@ -47,8 +47,20 @@ function LocationPicker({ onLocationPicked, location }) {
       if (!isValidLocation(pickedLocation)) {
         return;
       }
-      const address = await getAddress(pickedLocation.lat, pickedLocation.lng);
-      onLocationPicked({ ...pickedLocation, address });
+      if (pickedLocation.address) {
+        onLocationPicked(pickedLocation);
+        return;
+      }
+      try {
+        const address = await getAddress(pickedLocation.lat, pickedLocation.lng);
+        onLocationPicked({ ...pickedLocation, address });
+      } catch {
+        // Keep coordinates in form state even if reverse geocoding fails.
+        onLocationPicked({
+          ...pickedLocation,
+          address: "Unknown address",
+        });
+      }
     }
     handleLocation();
   }, [pickedLocation, onLocationPicked]);
@@ -66,6 +78,15 @@ function LocationPicker({ onLocationPicked, location }) {
   }
 
   async function getLocationHandler() {
+    if (isValidLocation(pickedLocation)) {
+      navigation.navigate("Map", {
+        initialLat: pickedLocation.lat,
+        initialLng: pickedLocation.lng,
+        returnScreen: route.name,
+      });
+      return;
+    }
+
     const hasPermission = await verifyPermissions();
     if (!hasPermission) {
       return;
@@ -78,6 +99,7 @@ function LocationPicker({ onLocationPicked, location }) {
     navigation.navigate("Map", {
       initialLat: locationResult.coords.latitude,
       initialLng: locationResult.coords.longitude,
+      returnScreen: route.name,
     });
   }
 

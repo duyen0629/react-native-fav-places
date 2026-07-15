@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Alert } from "react-native";
+import { View, Text, StyleSheet, Image, Alert, ScrollView, useWindowDimensions } from "react-native";
 import OutlinedButton from "../components/UI/OutlinedButton";
 import IconButton from "../components/UI/IconButton";
 import { Colors } from "../constants/colors";
@@ -6,11 +6,16 @@ import { getCategoryIcon } from "../constants/categories";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { deletePlace, fetchPlaceById } from "../util/database";
+import { parseImageUris } from "../util/images";
 
 function PlaceDetails({ route, navigation }) {
   const selectedPlaceId = route.params.placeId;
   const isFocused = useIsFocused();
+  const { width: windowWidth } = useWindowDimensions();
   const [loadedPlace, setLoadedPlace] = useState(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+
+  const galleryWidth = windowWidth - 32;
 
   function showOnMapHandler() {
     navigation.navigate("Map", {
@@ -28,6 +33,7 @@ function PlaceDetails({ route, navigation }) {
     async function loadPlaceData() {
       const place = await fetchPlaceById(selectedPlaceId);
       setLoadedPlace(place);
+      setActivePhotoIndex(0);
     }
 
     if (isFocused) {
@@ -69,6 +75,12 @@ function PlaceDetails({ route, navigation }) {
     ]);
   }
 
+  function handleGalleryScroll(event) {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / galleryWidth);
+    setActivePhotoIndex(index);
+  }
+
   if (!loadedPlace) {
     return (
       <View style={styles.fallback}>
@@ -79,11 +91,30 @@ function PlaceDetails({ route, navigation }) {
   }
 
   const categoryIcon = getCategoryIcon(loadedPlace.category);
+  const imageUris = parseImageUris(loadedPlace.imageUris ?? loadedPlace.imageUri);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.imageWrapper}>
-        <Image source={{ uri: loadedPlace.imageUri }} style={styles.image} />
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleGalleryScroll}
+          scrollEventThrottle={16}
+          style={{ width: galleryWidth }}
+        >
+          {imageUris.map((uri) => (
+            <Image key={uri} source={{ uri }} style={[styles.image, { width: galleryWidth }]} />
+          ))}
+        </ScrollView>
+        {imageUris.length > 1 && (
+          <View style={styles.dots}>
+            {imageUris.map((uri, index) => (
+              <View key={uri} style={[styles.dot, index === activePhotoIndex && styles.dotActive]} />
+            ))}
+          </View>
+        )}
       </View>
       <View style={styles.addressCard}>
         <View style={styles.category}>
@@ -98,7 +129,7 @@ function PlaceDetails({ route, navigation }) {
           View on Map
         </OutlinedButton>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -108,6 +139,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  content: {
+    paddingBottom: 32,
   },
   fallback: {
     flex: 1,
@@ -137,10 +171,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 12,
+    backgroundColor: Colors.surfaceSoft,
   },
   image: {
     height: 280,
-    width: "100%",
+  },
+  dots: {
+    position: "absolute",
+    bottom: 12,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,255,255,0.5)",
+  },
+  dotActive: {
+    backgroundColor: Colors.textLight,
   },
   addressCard: {
     marginHorizontal: 16,

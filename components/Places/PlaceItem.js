@@ -2,10 +2,13 @@ import { View, Text, Pressable, Image, StyleSheet } from "react-native";
 import { Colors } from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 import { getCategoryIcon } from "../../constants/categories";
+import { getPrimaryImageUri, parseImageUris } from "../../util/images";
 
 function PlaceItem({ place }) {
   const navigation = useNavigation();
   const categoryIcon = getCategoryIcon(place.category);
+  const primaryImageUri = getPrimaryImageUri(place);
+  const photoCount = parseImageUris(place.imageUris ?? place.imageUri).length;
 
   function selectPlaceHandler() {
     navigation.navigate("PlaceDetails", { placeId: place.id });
@@ -13,7 +16,14 @@ function PlaceItem({ place }) {
 
   return (
     <Pressable style={({ pressed }) => [styles.item, pressed && styles.pressed]} onPress={selectPlaceHandler}>
-      <Image source={{ uri: place.imageUri }} style={styles.image} />
+      <View style={styles.imageWrap}>
+        <Image source={{ uri: primaryImageUri }} style={styles.image} />
+        {photoCount > 1 && (
+          <View style={styles.photoBadge}>
+            <Text style={styles.photoBadgeText}>{photoCount}</Text>
+          </View>
+        )}
+      </View>
       <View style={styles.info}>
         <View style={styles.categoryRow}>
           <Text style={styles.category}>{place.category}</Text>
@@ -51,11 +61,32 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     transform: [{ scale: 0.97 }],
   },
+  imageWrap: {
+    width: 96,
+    height: 96,
+  },
   image: {
     width: 96,
     height: 96,
     borderTopLeftRadius: 22,
     borderBottomLeftRadius: 22,
+  },
+  photoBadge: {
+    position: "absolute",
+    right: 6,
+    bottom: 6,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: Colors.primary500,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  photoBadgeText: {
+    color: Colors.textLight,
+    fontSize: 11,
+    fontWeight: "700",
   },
   info: {
     flex: 1,
@@ -71,11 +102,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 4,
-  },
-  categoryIcon: {
-    width: 18,
-    height: 18,
-    marginRight: 6,
   },
   category: {
     fontSize: 11,

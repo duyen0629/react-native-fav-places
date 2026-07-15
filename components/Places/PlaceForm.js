@@ -10,11 +10,12 @@ import Place from "../../models/place";
 import { fetchPlaceCount } from "../../util/database";
 import { getAddPlaceDraft, updateAddPlaceDraft, resetAddPlaceDraft } from "../../util/addPlaceDraft";
 import { DEFAULT_CATEGORY } from "../../constants/categories";
+import { parseImageUris } from "../../util/images";
 
 function placeToFormState(place) {
   return {
     enteredTitle: place.title,
-    selectedImage: place.imageUri,
+    selectedImages: parseImageUris(place.imageUris ?? place.imageUri),
     pickedLocation: {
       lat: place.lat,
       lng: place.lng,
@@ -30,7 +31,7 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
   const isEditing = initialPlace != null;
   const initialFormState = initialPlace ? placeToFormState(initialPlace) : null;
   const [enteredTitle, setEnteredTitle] = useState(initialFormState?.enteredTitle ?? "");
-  const [selectedImage, setSelectedImage] = useState(initialFormState?.selectedImage ?? null);
+  const [selectedImages, setSelectedImages] = useState(initialFormState?.selectedImages ?? []);
   const [pickedLocation, setPickedLocation] = useState(initialFormState?.pickedLocation ?? null);
   const [selectedCategory, setSelectedCategory] = useState(initialFormState?.selectedCategory ?? DEFAULT_CATEGORY);
   const [formReady, setFormReady] = useState(isEditing);
@@ -48,10 +49,11 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
       }
 
       const draft = getAddPlaceDraft();
+      const draftImages = parseImageUris(draft.selectedImages ?? draft.selectedImage);
 
-      if (!route.params?.resetForm && (draft.enteredTitle || draft.selectedImage || draft.pickedLocation)) {
+      if (!route.params?.resetForm && (draft.enteredTitle || draftImages.length > 0 || draft.pickedLocation)) {
         setEnteredTitle(draft.enteredTitle);
-        setSelectedImage(draft.selectedImage);
+        setSelectedImages(draftImages);
         setPickedLocation(draft.pickedLocation);
         setSelectedCategory(draft.selectedCategory ?? DEFAULT_CATEGORY);
         setFormReady(true);
@@ -64,7 +66,7 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
       setSelectedCategory(DEFAULT_CATEGORY);
       updateAddPlaceDraft({
         enteredTitle: title,
-        selectedImage: null,
+        selectedImages: [],
         pickedLocation: null,
         selectedCategory: DEFAULT_CATEGORY,
       });
@@ -84,12 +86,12 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
       const count = await fetchPlaceCount();
       const title = `Fav ${count + 1}`;
       setEnteredTitle(title);
-      setSelectedImage(null);
+      setSelectedImages([]);
       setPickedLocation(null);
       setSelectedCategory(DEFAULT_CATEGORY);
       updateAddPlaceDraft({
         enteredTitle: title,
-        selectedImage: null,
+        selectedImages: [],
         pickedLocation: null,
         selectedCategory: DEFAULT_CATEGORY,
       });
@@ -110,8 +112,8 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
     if (!formReady) {
       return;
     }
-    updateAddPlaceDraft({ selectedImage });
-  }, [selectedImage, formReady]);
+    updateAddPlaceDraft({ selectedImages });
+  }, [selectedImages, formReady]);
 
   useEffect(() => {
     if (!formReady) {
@@ -130,9 +132,11 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
   function changeTitleHandler(enteredText) {
     setEnteredTitle(enteredText);
   }
-  function takeImageHandler(imageUri) {
-    setSelectedImage(imageUri);
+
+  function imagesChangeHandler(uris) {
+    setSelectedImages(parseImageUris(uris));
   }
+
   const pickLocationHandler = useCallback(
     (location) => {
       setPickedLocation(location);
@@ -145,8 +149,8 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
       Alert.alert("Missing title", "Please enter a title for this place.");
       return;
     }
-    if (!selectedImage) {
-      Alert.alert("Missing photo", "Please take a photo for this place.");
+    if (selectedImages.length === 0) {
+      Alert.alert("Missing photo", "Please add at least one photo for this place.");
       return;
     }
     if (pickedLocation?.lat == null || pickedLocation?.lng == null) {
@@ -154,7 +158,7 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
       return;
     }
 
-    const placeData = new Place(enteredTitle.trim(), selectedImage, pickedLocation, selectedCategory);
+    const placeData = new Place(enteredTitle.trim(), selectedImages, pickedLocation, selectedCategory);
     onCreatePlace(placeData);
   }
 
@@ -173,8 +177,8 @@ function PlaceForm({ onCreatePlace, initialPlace = null, submitLabel = "Save My 
         <CategoryPicker selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
       </View>
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>🌸 Photo</Text>
-        <ImagePicker onImageTaken={takeImageHandler} imageUri={selectedImage} />
+        <Text style={styles.sectionLabel}>🌸 Photos</Text>
+        <ImagePicker onImagesChange={imagesChangeHandler} imageUris={selectedImages} />
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>🎀 Location</Text>

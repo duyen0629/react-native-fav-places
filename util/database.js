@@ -1,5 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { DEFAULT_CATEGORY } from "../constants/categories";
+import { parseImageUris } from "./images";
 
 let database;
 
@@ -8,6 +9,17 @@ async function getDatabase() {
     database = await SQLite.openDatabaseAsync("places.db");
   }
   return database;
+}
+
+function mapPlaceRow(row) {
+  if (!row) {
+    return null;
+  }
+  const imageUris = parseImageUris(row.imageUri);
+  return {
+    ...row,
+    imageUris,
+  };
 }
 
 export async function init() {
@@ -46,7 +58,7 @@ export async function updatePlace(id, place) {
 export async function fetchPlaces() {
   const db = await getDatabase();
   const result = await db.getAllAsync("SELECT * FROM places");
-  return result;
+  return result.map(mapPlaceRow);
 }
 
 export async function fetchPlaceCount() {
@@ -58,7 +70,7 @@ export async function fetchPlaceCount() {
 export async function fetchPlaceById(id) {
   const db = await getDatabase();
   const place = await db.getFirstAsync("SELECT * FROM places WHERE id = ?", [id]);
-  return place;
+  return mapPlaceRow(place);
 }
 
 export async function deletePlace(id) {

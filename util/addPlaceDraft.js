@@ -2,7 +2,7 @@ import { DEFAULT_CATEGORY } from "../constants/categories";
 
 let draft = {
   enteredTitle: "",
-  selectedImage: null,
+  selectedImages: [],
   pickedLocation: null,
   selectedCategory: DEFAULT_CATEGORY,
 };
@@ -18,7 +18,7 @@ export function updateAddPlaceDraft(updates) {
 export function resetAddPlaceDraft() {
   draft = {
     enteredTitle: "",
-    selectedImage: null,
+    selectedImages: [],
     pickedLocation: null,
     selectedCategory: DEFAULT_CATEGORY,
   };

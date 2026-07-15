@@ -5,6 +5,7 @@ import { Colors } from "../../constants/colors";
 const SOLID_ICONS = {
   add: "add",
   camera: "camera",
+  images: "images",
   map: "map",
   location: "location",
   trash: "trash",

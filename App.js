@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import AllPlaces from "./screens/AllPlaces";
 import AddPlace from "./screens/AddPlace";
-import IconButton from "./components/UI/IconButton";
 import { Colors } from "./constants/colors";
 import Map from "./screens/Map";
 import { init } from "./util/database";
@@ -12,6 +11,7 @@ import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import PlaceDetails from "./screens/PlaceDetails";
 import EditPlace from "./screens/EditPlace";
+import PlacesMap from "./screens/PlacesMap";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,12 +48,9 @@ function RootNavigator() {
           <Stack.Screen
             name="AllPlaces"
             component={AllPlaces}
-            options={({ navigation }) => ({
+            options={{
               title: "Favorite Places",
-              headerRight: () => (
-                <IconButton icon="add" size={20} onPress={() => navigation.navigate("AddPlace", { resetForm: true })} />
-              ),
-            })}
+            }}
           />
           <Stack.Screen
             name="AddPlace"
@@ -72,6 +69,13 @@ function RootNavigator() {
             }}
           />
           <Stack.Screen name="Map" component={Map} />
+          <Stack.Screen
+            name="PlacesMap"
+            component={PlacesMap}
+            options={{
+              title: "Places Map",
+            }}
+          />
           <Stack.Screen
             name="PlaceDetails"
             component={PlaceDetails}

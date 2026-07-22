@@ -33,6 +33,22 @@
           "photosPermission": "The app accesses your photos so you can upload pictures of your favorite places."
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Favorite Places to use your location to save places and detect when you are nearby.",
+          "locationAlwaysAndWhenInUsePermission": "Allow Favorite Places to use your location in the background so it can alert you when you approach a saved place.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/notification_sound.wav"],
+          "color": "#EC407A"
+        }
+      ],
       "expo-sqlite"
     ]
   }

@@ -1,4 +1,14 @@
-import { View, Text, StyleSheet, Image, Alert, ScrollView, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Alert,
+  ScrollView,
+  Switch,
+  Linking,
+  useWindowDimensions,
+} from "react-native";
 import OutlinedButton from "../components/UI/OutlinedButton";
 import IconButton from "../components/UI/IconButton";
 import { Colors } from "../constants/colors";
@@ -7,6 +17,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { deletePlace, fetchPlaceById } from "../util/database";
 import { parseImageUris } from "../util/images";
+import { setPlaceAlert, syncGeofences } from "../util/nearbyAlerts";
 
 function PlaceDetails({ route, navigation }) {
   const selectedPlaceId = route.params.placeId;
@@ -66,6 +77,7 @@ function PlaceDetails({ route, navigation }) {
         onPress: async () => {
           try {
             await deletePlace(selectedPlaceId);
+            await syncGeofences();
             navigation.goBack();
           } catch {
             Alert.alert("Error", "Could not delete place. Please try again.");
@@ -79,6 +91,28 @@ function PlaceDetails({ route, navigation }) {
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / galleryWidth);
     setActivePhotoIndex(index);
+  }
+
+  async function handleAlertToggle(nextValue) {
+    try {
+      const result = await setPlaceAlert(selectedPlaceId, nextValue);
+      if (!result.granted) {
+        const message =
+          result.reason === "notifications"
+            ? "Notification permission is required for nearby alerts."
+            : result.reason === "background"
+              ? "Background location (Always) is required for nearby alerts when the app is closed."
+              : "Location permission is required for nearby alerts.";
+        Alert.alert("Permission needed", message, [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: () => Linking.openSettings() },
+        ]);
+        return;
+      }
+      setLoadedPlace((current) => (current ? { ...current, alertEnabled: nextValue } : current));
+    } catch {
+      Alert.alert("Could not update nearby alert for this place.");
+    }
   }
 
   if (!loadedPlace) {
@@ -123,6 +157,18 @@ function PlaceDetails({ route, navigation }) {
         </View>
         <Text style={styles.addressLabel}>Address</Text>
         <Text style={styles.address}>{loadedPlace.address}</Text>
+        <View style={styles.alertRow}>
+          <View style={styles.alertText}>
+            <Text style={styles.alertTitle}>Alert me nearby</Text>
+            <Text style={styles.alertSubtitle}>Notify when I approach this place</Text>
+          </View>
+          <Switch
+            value={Boolean(loadedPlace.alertEnabled)}
+            onValueChange={handleAlertToggle}
+            trackColor={{ false: Colors.primary100, true: Colors.primary400 }}
+            thumbColor={loadedPlace.alertEnabled ? Colors.primary700 : Colors.surface}
+          />
+        </View>
       </View>
       <View style={styles.actions}>
         <OutlinedButton icon="map" onPress={showOnMapHandler}>
@@ -241,6 +287,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     lineHeight: 24,
+  },
+  alertRow: {
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.primary100,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  alertText: {
+    flex: 1,
+  },
+  alertTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: Colors.primary800,
+    marginBottom: 2,
+  },
+  alertSubtitle: {
+    fontSize: 13,
+    color: Colors.gray500,
+    lineHeight: 18,
   },
   actions: {
     marginTop: 20,

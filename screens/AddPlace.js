@@ -2,12 +2,14 @@ import { Alert } from "react-native";
 import PlaceForm from "../components/Places/PlaceForm";
 import { insertPlace } from "../util/database";
 import { resetAddPlaceDraft } from "../util/addPlaceDraft";
+import { syncGeofences } from "../util/nearbyAlerts";
 
 function AddPlace({ navigation }) {
   function createPlaceHandler(placeData) {
     insertPlace(placeData)
-      .then(() => {
+      .then(async () => {
         resetAddPlaceDraft();
+        await syncGeofences();
         navigation.popToTop();
       })
       .catch(() => {

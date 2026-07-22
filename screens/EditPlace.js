@@ -4,6 +4,7 @@ import PlaceForm from "../components/Places/PlaceForm";
 import { fetchPlaceById, updatePlace } from "../util/database";
 import { resetAddPlaceDraft } from "../util/addPlaceDraft";
 import { Colors } from "../constants/colors";
+import { syncGeofences } from "../util/nearbyAlerts";
 
 function EditPlace({ route, navigation }) {
   const placeId = route.params.placeId;
@@ -30,8 +31,9 @@ function EditPlace({ route, navigation }) {
 
   function updatePlaceHandler(placeData) {
     updatePlace(placeId, placeData)
-      .then(() => {
+      .then(async () => {
         resetAddPlaceDraft();
+        await syncGeofences();
         navigation.goBack();
       })
       .catch(() => {

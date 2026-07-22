@@ -27,6 +27,7 @@ function AllPlaces() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.headerActions}>
+          <IconButton icon="notifications" size={18} onPress={() => navigation.navigate("NearbyAlerts")} />
           <IconButton
             icon="map"
             size={18}

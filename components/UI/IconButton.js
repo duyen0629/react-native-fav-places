@@ -9,6 +9,7 @@ const SOLID_ICONS = {
   trash: "trash",
   save: "checkmark",
   edit: "create",
+  notifications: "notifications",
 };
 
 function IconButton({ icon, size = 24, onPress }) {

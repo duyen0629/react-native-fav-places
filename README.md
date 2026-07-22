@@ -11,7 +11,8 @@ A React Native app built with Expo for saving and browsing your favorite places.
 - **Location** — Tap **Get Location** to read GPS, open an interactive map centered on your position, adjust the pin if needed, and save (`expo-location`, `react-native-maps`). When a location is already set (e.g. while editing), the map opens centered on that place so you can adjust the pin.
 - **Map preview** — Static map image for the picked location via Google Maps Static API.
 - **Reverse geocoding** — Resolve coordinates to a human-readable address via Google Geocoding API.
-- **Place details** — Tap a place to swipe through its photo gallery, see address, and open its location on the map. Edit or delete from the header.
+- **Place details** — Tap a place to swipe through its photo gallery, see address, and open its location on the map. Edit or delete from the header. Toggle **Alert me nearby** to watch that place.
+- **Nearby alerts** — Get a local notification when you approach an alert-enabled place. Global on/off, radius (100 / 200 / 500 m), and a foreground “Check nearby now” action. Uses geofencing in the background plus a foreground fallback when the app becomes active (`expo-location`, `expo-notifications`, `expo-task-manager`).
 - **Local persistence** — Places are saved in SQLite and survive app restarts (`expo-sqlite`).
 - **Pink UI** — Soft pink theme with rounded cards, pill buttons, and solid icon controls in the header.
 
@@ -29,12 +30,15 @@ AllPlaces ──► tap + ──► AddPlace (PlaceForm, fresh draft)
 
 AllPlaces ──► tap place ──► PlaceDetails (swipe gallery) ──► View on Map ──► Map (read-only)
                             │
+                            ├── Alert me nearby ──► enable geofence for this place
                             ├── edit ──► EditPlace (PlaceForm, prefilled)
                             │                 │
                             │                 ├── change photos / location as needed
                             │                 │       └── Map ──► popTo EditPlace
                             │                 └── Update ──► SQLite ──► goBack ──► PlaceDetails (refreshed)
                             └── trash ──► delete ──► goBack ──► AllPlaces
+
+AllPlaces ──► bell icon ──► NearbyAlerts (global on/off, radius, check now)
 ```
 
 **Adding a place**
@@ -75,7 +79,21 @@ AllPlaces ──► tap place ──► PlaceDetails (swipe gallery) ──► V
 
 From **Place Details**, **View on Map** opens the map in read-only mode (`readOnly: true`) — the pin is shown but cannot be moved and there is no save button.
 
-When adding or editing a place, data is stored in the `Place` model and written to SQLite as flat columns (`title`, `imageUri`, `address`, `lat`, `lng`, `category`). The `imageUri` column stores a JSON array of local photo URIs (legacy single-URI values are still supported when reading). When reading from the database, rows expose `imageUris` and use `lat`/`lng` directly rather than a nested `location` object.
+**Nearby alerts**
+
+1. Tap the **bell** icon on the home screen to open **Nearby Alerts**.
+2. Turn **Nearby alerts** on — the app asks for notification permission, foreground location, then background / Always location.
+3. Choose an alert **radius** (100 m, 200 m, or 500 m).
+4. Open a place and enable **Alert me nearby**. That place is registered as a geofence region (up to **20** places, matching the iOS limit).
+5. When you enter a watched region, a local notification plays (`assets/notification_sound.wav`) with the place title. Tapping it opens **Place Details**.
+6. The same place will not notify again for **2 hours** (cooldown), so app restarts / re-registration do not spam you.
+7. **Check nearby now** (and an automatic check when the app returns to the foreground) compare your current GPS position to alert-enabled places — useful in Expo Go, where background geofencing is limited.
+
+Geofencing is defined in `util/geofencingTask.js` and must stay imported early from `index.js` so the task is registered when the OS wakes the app in the background. Syncing regions happens whenever alerts settings change, a place’s alert toggle changes, or a place is added / updated / deleted (`util/nearbyAlerts.js` → `syncGeofences()`).
+
+> **Note:** Full background geofencing requires a **development build** or production binary with the `expo-location` / `expo-notifications` config plugins applied. In Expo Go, use **Check nearby now** / foreground checks to verify alerts. Remote push is not used; we only schedule local notifications. On Android Expo Go, importing the main `expo-notifications` entry can show a push-related console error — this project imports local APIs only via `util/localNotifications.js` to avoid that.
+
+When adding or editing a place, data is stored in the `Place` model and written to SQLite as flat columns (`title`, `imageUri`, `address`, `lat`, `lng`, `category`, `alertEnabled`). The `imageUri` column stores a JSON array of local photo URIs (legacy single-URI values are still supported when reading). When reading from the database, rows expose `imageUris` and use `lat`/`lng` directly rather than a nested `location` object.
 
 ## Tech stack
 
@@ -84,7 +102,9 @@ When adding or editing a place, data is stored in the `Place` model and written 
 - [React Navigation](https://reactnavigation.org/) (native stack)
 - [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) — local database
 - [expo-image-picker](https://docs.expo.dev/versions/latest/sdk/imagepicker/) — camera and multi-photo library upload
-- [expo-location](https://docs.expo.dev/versions/latest/sdk/location/) — device location
+- [expo-location](https://docs.expo.dev/versions/v54.0.0/sdk/location/) — device location and geofencing
+- [expo-notifications](https://docs.expo.dev/versions/v54.0.0/sdk/notifications/) — local nearby-place alerts
+- [expo-task-manager](https://docs.expo.dev/versions/v54.0.0/sdk/task-manager/) — background geofence task
 - [react-native-maps](https://docs.expo.dev/versions/latest/sdk/map-view/) — interactive map
 - Google Maps Static API — map preview images
 - Google Geocoding API — address lookup from coordinates
@@ -152,19 +172,24 @@ The app requests permissions at runtime:
 | --------------------- | ----------------------------------------------------- |
 | Camera                | Taking photos for places                              |
 | Photo library         | Uploading one or more photos from the device library  |
-| Location (foreground) | GPS for **Get Location** and centering the map on your position |
+| Location (foreground) | GPS for **Get Location**, map centering, and nearby checks |
+| Location (background / Always) | Geofencing for nearby alerts while the app is closed |
+| Notifications         | Local alerts when you approach a watched place        |
 
-Camera and photos permission text is configured in `app.json` via the `expo-image-picker` plugin.
+Camera and photos permission text is configured in `app.json` via the `expo-image-picker` plugin. Location and notification copy / background modes are configured via the `expo-location` and `expo-notifications` plugins.
 
 ## Project structure
 
 ```
 fav-places/
-├── App.js                     # Navigation stack, DB init, splash screen, safe-area header
-├── app.json                   # Expo config and plugins
+├── App.js                     # Navigation stack, DB init, splash, notification → place deep link
+├── app.json                   # Expo config and plugins (location, notifications, image picker)
+├── assets/
+│   └── notification_sound.wav # Custom nearby-alert notification sound
 ├── constants/
 │   ├── categories.js          # Place category list and icons
-│   └── colors.js              # Pink theme palette
+│   ├── colors.js              # Pink theme palette
+│   └── nearbyAlerts.js        # Geofence task name, radius options, cooldown
 ├── components/
 │   ├── Places/
 │   │   ├── CategoryFilter.js  # Home screen category filter chips
@@ -181,31 +206,39 @@ fav-places/
 ├── models/
 │   └── place.js               # Place data model
 ├── screens/
-│   ├── AllPlaces.js           # Home — loads and displays saved places
+│   ├── AllPlaces.js           # Home — loads places; map / alerts / add header actions
 │   ├── AddPlace.js            # Saves a new place, clears draft, popToTop
 │   ├── EditPlace.js           # Loads a place, updates SQLite, goBack to details
 │   ├── Map.js                 # Interactive map (pick & save, or read-only view)
-│   └── PlaceDetails.js        # Gallery, edit, delete, "View on Map"
+│   ├── NearbyAlerts.js        # Global nearby-alert settings
+│   ├── PlacesMap.js           # All saved places on one map
+│   └── PlaceDetails.js        # Gallery, per-place alert toggle, edit, delete, "View on Map"
 └── util/
     ├── addPlaceDraft.js       # In-memory form draft (title, photos, location)
-    ├── database.js            # SQLite init, insert, update, fetch, count, delete
+    ├── database.js            # SQLite init, CRUD, settings, alertEnabled
+    ├── geofencingTask.js      # TaskManager geofence enter → notification
     ├── images.js              # Parse/serialize multi-photo URI lists
-    └── location.js            # Google Static Maps URL + geocoding
+    ├── location.js            # Google Static Maps URL + geocoding
+    ├── localNotifications.js  # Deep imports for local alerts (avoids Expo Go push error)
+    └── nearbyAlerts.js        # Permissions, sync geofences, notify, foreground check
 ```
 
 ## Database schema
 
 Places are stored in a local SQLite database (`places.db`):
 
-| Column     | Type    | Description                                              |
-| ---------- | ------- | -------------------------------------------------------- |
-| `id`       | INTEGER | Primary key (auto)                                       |
-| `title`    | TEXT    | Place name                                               |
-| `imageUri` | TEXT    | JSON array of local photo URIs (legacy single URI OK)    |
-| `address`  | TEXT    | Reverse-geocoded address                                 |
-| `lat`      | REAL    | Latitude                                                 |
-| `lng`      | REAL    | Longitude                                                |
-| `category` | TEXT    | Place category                                           |
+| Column         | Type    | Description                                              |
+| -------------- | ------- | -------------------------------------------------------- |
+| `id`           | INTEGER | Primary key (auto)                                       |
+| `title`        | TEXT    | Place name                                               |
+| `imageUri`     | TEXT    | JSON array of local photo URIs (legacy single URI OK)    |
+| `address`      | TEXT    | Reverse-geocoded address                                 |
+| `lat`          | REAL    | Latitude                                                 |
+| `lng`          | REAL    | Longitude                                                |
+| `category`     | TEXT    | Place category                                           |
+| `alertEnabled` | INTEGER | `1` if this place should trigger nearby alerts           |
+
+App settings (nearby alerts on/off, radius, per-place notify cooldown timestamps) are stored in a `settings` key/value table.
 
 ## Environment variables
 

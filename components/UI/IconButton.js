@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "../../constants/colors";
 
 const SOLID_ICONS = {
   add: "add",
@@ -17,7 +18,7 @@ function IconButton({ icon, size = 24, onPress }) {
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.button, pressed && styles.pressed]} hitSlop={8}>
-      <Ionicons name={iconName} size={size} />
+      <Ionicons name={iconName} size={size} color={Colors.textLight} />
     </Pressable>
   );
 }

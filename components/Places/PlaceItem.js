@@ -3,12 +3,14 @@ import { Colors } from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 import { getCategoryIcon } from "../../constants/categories";
 import { getPrimaryImageUri, parseImageUris } from "../../util/images";
+import { formatDistance } from "../../util/distance";
 
-function PlaceItem({ place }) {
+function PlaceItem({ place, showDistance = false }) {
   const navigation = useNavigation();
   const categoryIcon = getCategoryIcon(place.category);
   const primaryImageUri = getPrimaryImageUri(place);
   const photoCount = parseImageUris(place.imageUris ?? place.imageUri).length;
+  const distanceLabel = showDistance ? formatDistance(place.distanceMeters) : null;
 
   function selectPlaceHandler() {
     navigation.navigate("PlaceDetails", { placeId: place.id });
@@ -27,6 +29,7 @@ function PlaceItem({ place }) {
       <View style={styles.info}>
         <View style={styles.categoryRow}>
           <Text style={styles.category}>{place.category}</Text>
+          {distanceLabel && <Text style={styles.distance}>{distanceLabel}</Text>}
         </View>
         <Text style={styles.title}>{place.title}</Text>
         <Text style={styles.address} numberOfLines={2}>
@@ -110,6 +113,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.4,
     flex: 1,
+  },
+  distance: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.primary500,
+    marginLeft: 8,
   },
   address: {
     fontSize: 13,

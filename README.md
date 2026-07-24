@@ -4,7 +4,7 @@ A React Native app built with Expo for saving and browsing your favorite places.
 
 ## Features
 
-- **Places list** — View all saved places with cover photo, title, address, and category. A badge shows when a place has multiple photos. Filter by category on the home screen. The list refreshes when you return to the home screen.
+- **Places list** — View all saved places with cover photo, title, address, and category. A badge shows when a place has multiple photos. Filter by category on the home screen. Sort by **Default** or **Nearest** (distance from your GPS). The list refreshes when you return to the home screen.
 - **Add a place** — Form with auto-prefilled title (`Fav 1`, `Fav 2`, …), category picker, multi-photo picker, and location picker.
 - **Edit a place** — From place details, tap the edit icon to update title, category, photos, or location. Changes are written back to SQLite.
 - **Multi-photo** — Take photos with the camera and/or upload several from the library (up to 8). Manage thumbnails and remove photos before saving (`expo-image-picker`).
@@ -39,6 +39,7 @@ AllPlaces ──► tap place ──► PlaceDetails (swipe gallery) ──► V
                             └── trash ──► delete ──► goBack ──► AllPlaces
 
 AllPlaces ──► bell icon ──► NearbyAlerts (global on/off, radius, check now)
+AllPlaces ──► Sort: Default | Nearest ──► list ordered by GPS distance (shows km/m on each row)
 ```
 
 **Adding a place**
@@ -78,6 +79,13 @@ AllPlaces ──► bell icon ──► NearbyAlerts (global on/off, radius, che
 **Viewing a saved place on the map**
 
 From **Place Details**, **View on Map** opens the map in read-only mode (`readOnly: true`) — the pin is shown but cannot be moved and there is no save button.
+
+**Sort by distance**
+
+1. On the home screen, use the **Sort** chips under the category filter: **Default** (saved order) or **Nearest**.
+2. Choosing **Nearest** requests foreground location if needed, then sorts the current category filter by distance from you.
+3. Each row shows a distance label (`240 m`, `1.2 km`, …) while Nearest is active.
+4. If location is denied, the app stays on **Default** and prompts you to open Settings.
 
 **Nearby alerts**
 
@@ -198,7 +206,8 @@ fav-places/
 │   │   ├── LocationPicker.js  # Get Location → Map, static map preview
 │   │   ├── PlaceForm.js       # Add/edit form, title prefill, draft sync
 │   │   ├── PlaceItem.js       # Single place row (navigates to details)
-│   │   └── PlacesList.js      # FlatList of places
+│   │   ├── PlacesList.js      # FlatList of places
+│   │   └── SortFilter.js      # Default / Nearest sort chips
 │   └── UI/
 │       ├── Button.js
 │       ├── IconButton.js      # Header action buttons (circular, matches back button)
@@ -206,7 +215,7 @@ fav-places/
 ├── models/
 │   └── place.js               # Place data model
 ├── screens/
-│   ├── AllPlaces.js           # Home — loads places; map / alerts / add header actions
+│   ├── AllPlaces.js           # Home — loads places; map / alerts / add; nearest sort
 │   ├── AddPlace.js            # Saves a new place, clears draft, popToTop
 │   ├── EditPlace.js           # Loads a place, updates SQLite, goBack to details
 │   ├── Map.js                 # Interactive map (pick & save, or read-only view)
@@ -216,6 +225,7 @@ fav-places/
 └── util/
     ├── addPlaceDraft.js       # In-memory form draft (title, photos, location)
     ├── database.js            # SQLite init, CRUD, settings, alertEnabled
+    ├── distance.js            # Haversine distance + nearest-sort helpers
     ├── geofencingTask.js      # TaskManager geofence enter → notification
     ├── images.js              # Parse/serialize multi-photo URI lists
     ├── location.js            # Google Static Maps URL + geocoding

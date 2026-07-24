@@ -3,7 +3,12 @@ import PlaceItem from "./PlaceItem";
 import { Colors } from "../../constants/colors";
 import { ALL_CATEGORIES } from "./CategoryFilter";
 
-function PlacesList({ places, totalPlacesCount = 0, selectedCategory = ALL_CATEGORIES }) {
+function PlacesList({
+  places,
+  totalPlacesCount = 0,
+  selectedCategory = ALL_CATEGORIES,
+  showDistance = false,
+}) {
   if (totalPlacesCount === 0) {
     return (
       <View style={styles.fallbackContainer}>
@@ -30,7 +35,7 @@ function PlacesList({ places, totalPlacesCount = 0, selectedCategory = ALL_CATEG
       contentContainerStyle={styles.listContent}
       data={places}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <PlaceItem place={item} />}
+      renderItem={({ item }) => <PlaceItem place={item} showDistance={showDistance} />}
       showsVerticalScrollIndicator={false}
     />
   );
